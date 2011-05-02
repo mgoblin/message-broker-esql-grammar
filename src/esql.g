@@ -5,6 +5,49 @@ options {
   output = AST;
 }
 
+// Expression
+expr	:	math_mult_div_expr;
+
+math_mult_div_expr
+	:	math_add_substr_expr ( (MULT_OP^ | DIV_OP^) math_add_substr_expr )*;
+
+math_add_substr_expr
+	:	strexpr ( (PLUS_OP^ | MINUS_OP^) strexpr )*;
+
+strexpr	:	scexpr (CONCAT_OP^ scexpr)*;
+
+scexpr	:	lexpr (SIMPLE_COMPARE_OP^ lexpr)*;
+
+lexpr	:	luexpr (BINARY_LOGICAL_OP^ luexpr)*;
+
+luexpr	:	UNARY_LOGICAL_OP^? mu_expr;
+
+mu_expr	:	MINUS_OP^? atom;
+
+atom	:	ID | INT | STRING | BOOL | NULL | '('! expr ')'!;
+
+// Simple comparison operators
+SIMPLE_COMPARE_OP
+	:	'>' | '<' | '>=' | '<=' | '=' | '<>';
+
+// Complex comparison operators
+CC_OP 	:	'BETWEEN';
+
+// Logical binary operators
+BINARY_LOGICAL_OP : 'AND' | 'OR';
+
+// Logical unary operator
+UNARY_LOGICAL_OP
+	:	'NOT';
+
+PLUS_OP	:	'+';
+MINUS_OP:	'-';
+MULT_OP	:	'*';
+DIV_OP	:	'/';
+
+CONCAT_OP
+	:	'||';
+
 // ESQL keywords
 ATOMIC	:	'ATOMIC';
 ATTACH	:	'ATTACH';
@@ -107,15 +150,19 @@ FLOAT	:	'FLOAT';
 INTEGER	:	'INTEGER';
 ROW	:	'ROW';
 
+// ESQL data types values
+NULL	:	'NULL';
+BOOL	:	'TRUE' | 'FALSE';
+INT	:	('0'..'9')+;
+STRING	:	'"' ( ESC_SEQ | ~('\\'|'"') )* '"';
 
 ID  :	('a'..'z'|'A'..'Z'|'_') ('a'..'z'|'A'..'Z'|'0'..'9'|'_')*
     ;
 
-
 //Standard syntactic elements 
 
 COMMENT
-    :   '//' ~('\n'|'\r')* '\r'? '\n' {$channel=HIDDEN;}
+    :   '--' ~('\n'|'\r')* '\r'? '\n' {$channel=HIDDEN;}
     |   '/*' ( options {greedy=false;} : . )* '*/' {$channel=HIDDEN;}
     ;
 
@@ -124,10 +171,6 @@ WS  :   ( ' '
         | '\r'
         | '\n'
         ) {$channel=HIDDEN;}
-    ;
-
-STRING
-    :  '"' ( ESC_SEQ | ~('\\'|'"') )* '"'
     ;
 
 fragment
