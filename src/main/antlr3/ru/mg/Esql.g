@@ -1,9 +1,11 @@
-grammar esql;
+grammar Esql;
 
 options {
   language = Java;
   output = AST;
 }
+
+module	:	expr+ ';';
 
 // Expression
 expr	:	math_mult_div_expr;
@@ -12,8 +14,9 @@ math_mult_div_expr
 	:	math_add_substr_expr ( (MULT_OP^ | DIV_OP^) math_add_substr_expr )*;
 
 math_add_substr_expr
-	:	strexpr ( (PLUS_OP^ | MINUS_OP^) strexpr )*;
+	:	atom ( (PLUS_OP^ | MINUS_OP^) atom )*;
 
+/*
 strexpr	:	scexpr (CONCAT_OP^ scexpr)*;
 
 scexpr	:	lexpr (SIMPLE_COMPARE_OP^ lexpr)*;
@@ -23,6 +26,7 @@ lexpr	:	luexpr (BINARY_LOGICAL_OP^ luexpr)*;
 luexpr	:	UNARY_LOGICAL_OP^? mu_expr;
 
 mu_expr	:	MINUS_OP^? atom;
+*/
 
 atom	:	ID | INT | STRING | BOOL | NULL | '('! expr ')'!;
 
