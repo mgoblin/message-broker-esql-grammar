@@ -1,0 +1,9 @@
+gunit Esql;
+
+ID:
+    "X" OK
+    "XYZ" OK
+    "Xyz" OK
+    "XyZ" OK
+    "_X" OK
+    "1X" FAIL
