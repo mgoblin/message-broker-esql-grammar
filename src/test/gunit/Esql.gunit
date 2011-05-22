@@ -1,5 +1,9 @@
 gunit Esql;
 
+
+//
+// Primitives
+//
 ID:
     "X" OK
     "XYZ" OK
@@ -9,6 +13,9 @@ ID:
     "1X" FAIL
 INT:
     "1" OK
+
+LITERAL:
+    "'http://esql.ru'" OK
 
 atom    :
    "10" -> "10"
@@ -48,3 +55,6 @@ logic_expr:
     "NOT (a > b) = TRUE" -> "(= (NOT (> a b)) TRUE)"
 
 
+var_ns_decl:
+    "DECLARE sp1 NAMESPACE 'http://esql.ru'" -> (NAMESPACE (sp1 (INIT 'http://esql.ru')))
+    "DECLARE sp1, sp2 SHARED NAMESPACE 'http://esql.ru'" -> (NAMESPACE (sp1 (INIT 'http://esql.ru') SHARED)) (NAMESPACE (sp2 (INIT 'http://esql.ru') SHARED))
