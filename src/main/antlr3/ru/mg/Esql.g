@@ -10,6 +10,7 @@ module	:	expr+ ';'!;
 // Expression
 expr	:	logic_expr;
 
+
 logic_expr	
 	:	sc_expr (BINARY_LOGICAL_OP^ sc_expr)*;
 
@@ -27,10 +28,8 @@ mult_expr
 ulogic_expr	
 	:	UNARY_LOGICAL_OP^? atom;
 
-/*mu_expr	:	MINUS_OP^? atom;
 	
-*/
-atom	:	ID | INT | STRING | BOOL | NULL | '('! expr ')'!;
+atom	:	ID | MINUS_OP^? INT | STRING | BOOL | NULL | '('! expr ')'!;
 
 // Simple comparison operators
 SIMPLE_COMPARE_OP
