@@ -8,14 +8,15 @@ options {
 module	:	expr+ ';'!;
 
 // Expression
-expr	:	math_add_expr;
+expr	:	add_expr;
 
-math_add_expr
-	:	atom ( (PLUS_OP | MINUS_OP)^ atom )*;
+add_expr
+	:	mult_expr ( (PLUS_OP^ | MINUS_OP^) mult_expr )*;
 
-/*math_mult_div_expr
-	:	math_add_substr_expr ( (MULT_OP^ | (DIV_OP^) math_add_substr_expr)*;
+mult_expr
+	:	atom ( (MULT_OP^ | DIV_OP^) atom)*;
 
+/*
 strexpr	:	scexpr (CONCAT_OP^ scexpr)*;
 
 scexpr	:	lexpr (SIMPLE_COMPARE_OP^ lexpr)*;
