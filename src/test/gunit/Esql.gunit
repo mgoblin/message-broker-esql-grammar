@@ -39,5 +39,8 @@ mult_expr:
     "6 / 10" -> (/ 6 10)
     "1 * 2 * 3 * 4" -> (* (* (* 1 2) 3) 4)
 
+logic_expr:
+    "a > b AND x < y" -> (AND (> a b) (< x y))
+    "NOT (a > b) = TRUE" -> "(= (NOT (> a b)) TRUE)"
 
 

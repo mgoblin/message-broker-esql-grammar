@@ -8,7 +8,10 @@ options {
 module	:	expr+ ';'!;
 
 // Expression
-expr	:	sc_expr;
+expr	:	logic_expr;
+
+logic_expr	
+	:	sc_expr (BINARY_LOGICAL_OP^ sc_expr)*;
 
 sc_expr	:	concat_expr (SIMPLE_COMPARE_OP^ concat_expr)*;
 
@@ -19,15 +22,12 @@ add_expr
 	:	mult_expr ( (PLUS_OP^ | MINUS_OP^) mult_expr )*;
 
 mult_expr
-	:	atom ( (MULT_OP^ | DIV_OP^) atom)*;
+	:	ulogic_expr ( (MULT_OP^ | DIV_OP^) ulogic_expr)*;
 
+ulogic_expr	
+	:	UNARY_LOGICAL_OP^? atom;
 
-
-/*lexpr	:	luexpr (BINARY_LOGICAL_OP^ luexpr)*;
-
-luexpr	:	UNARY_LOGICAL_OP^? mu_expr;
-
-mu_expr	:	MINUS_OP^? atom;
+/*mu_expr	:	MINUS_OP^? atom;
 	
 */
 atom	:	ID | INT | STRING | BOOL | NULL | '('! expr ')'!;
