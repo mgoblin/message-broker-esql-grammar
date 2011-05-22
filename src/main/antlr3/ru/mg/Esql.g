@@ -5,18 +5,17 @@ options {
   output = AST;
 }
 
-module	:	expr+ ';';
+module	:	expr+ ';'!;
 
 // Expression
-expr	:	math_mult_div_expr;
+expr	:	math_add_expr;
 
-math_mult_div_expr
-	:	math_add_substr_expr ( (MULT_OP^ | DIV_OP^) math_add_substr_expr )*;
+math_add_expr
+	:	atom ( (PLUS_OP | MINUS_OP)^ atom )*;
 
-math_add_substr_expr
-	:	atom ( (PLUS_OP^ | MINUS_OP^) atom )*;
+/*math_mult_div_expr
+	:	math_add_substr_expr ( (MULT_OP^ | (DIV_OP^) math_add_substr_expr)*;
 
-/*
 strexpr	:	scexpr (CONCAT_OP^ scexpr)*;
 
 scexpr	:	lexpr (SIMPLE_COMPARE_OP^ lexpr)*;
@@ -26,8 +25,8 @@ lexpr	:	luexpr (BINARY_LOGICAL_OP^ luexpr)*;
 luexpr	:	UNARY_LOGICAL_OP^? mu_expr;
 
 mu_expr	:	MINUS_OP^? atom;
+	
 */
-
 atom	:	ID | INT | STRING | BOOL | NULL | '('! expr ')'!;
 
 // Simple comparison operators
@@ -53,7 +52,7 @@ CONCAT_OP
 	:	'||';
 
 // ESQL keywords
-ATOMIC	:	'ATOMIC';
+/*ATOMIC	:	'ATOMIC';
 ATTACH	:	'ATTACH';
 BEGIN 	:	'BEGIN';
 CALL	:	'CALL';
@@ -153,7 +152,7 @@ DECIMAL	:	'DECIMAL';
 FLOAT	:	'FLOAT';
 INTEGER	:	'INTEGER';
 ROW	:	'ROW';
-
+*/
 // ESQL data types values
 NULL	:	'NULL';
 BOOL	:	'TRUE' | 'FALSE';
