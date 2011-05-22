@@ -6,7 +6,7 @@ options {
   backtrack= true;
 }
 
-module	:	statement+ ';'!;
+module	:	statement+;
 
 //Statement
 statement	:	(var_decl | expr) ';'! 
