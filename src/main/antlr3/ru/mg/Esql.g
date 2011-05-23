@@ -14,7 +14,7 @@ statement	:	(var_decl | expr) ';'!
 		
 /*
 ----------------------------------------------
-	Variable declaration statements
+	DECLARE statements
 ----------------------------------------------	
 */
 var_decl	:	var_only_decl | const_decl| var_ns_decl | var_ctor_decl 
