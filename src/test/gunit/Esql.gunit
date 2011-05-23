@@ -63,6 +63,10 @@ var_ns_decl:
 var_only_decl:
     "DECLARE deployEnvironment EXTERNAL CHARACTER" -> (VAR (deployEnvironment CHARACTER EXTERNAL))
     "DECLARE deployEnvironment INT" -> (VAR (deployEnvironment INT))
+    "DECLARE sp1, sp2 SHARED INT" -> (VAR (sp1 INT SHARED)) (VAR (sp2 INT SHARED))
 
 const_decl:
      "DECLARE deployEnvironment EXTERNAL CONSTANT CHARACTER 'XYZ'" -> (CONSTANT (deployEnvironment CHARACTER EXTERNAL)) (INIT deployEnvironment 'XYZ')
+
+var_ctor_decl:
+    "DECLARE v INT -10" -> (VAR (v INT)) (INIT v (- 10))
