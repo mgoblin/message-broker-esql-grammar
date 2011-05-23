@@ -17,12 +17,15 @@ statement	:	(var_decl | expr) ';'!
 	Variable declaration statements
 ----------------------------------------------	
 */
-var_decl	:	var_only_decl | var_ns_decl//var_ctor_decl | var_only_decl | var_ns_decl
+var_decl	:	var_only_decl | const_decl| var_ns_decl//var_ctor_decl | var_only_decl | var_ns_decl
 		;
 		
 var_only_decl	:	DECLARE var_name (',' var_name)* var_modifier? type
 		->	^(VAR ^(var_name type var_modifier?))+
 		;
+const_decl	:	DECLARE var_name (',' var_name)* var_modifier? CONSTANT type expr
+		->	^(CONSTANT ^(var_name type var_modifier?))+ ^(INIT var_name expr)+	
+		;				
 
 /*var_ctor_decl	:	DECLARE var_name (',' var_name)* var_modifiers? type CONSTANT? expr
 		->	^(DECLARE ^(type var_name var_modifiers?))+ ^(INIT var_name expr)+

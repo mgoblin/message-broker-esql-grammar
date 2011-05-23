@@ -63,3 +63,6 @@ var_ns_decl:
 var_only_decl:
     "DECLARE deployEnvironment EXTERNAL CHARACTER" -> (VAR (deployEnvironment CHARACTER EXTERNAL))
     "DECLARE deployEnvironment INT" -> (VAR (deployEnvironment INT))
+
+const_decl:
+     "DECLARE deployEnvironment EXTERNAL CONSTANT CHARACTER 'XYZ'" -> (CONSTANT (deployEnvironment CHARACTER EXTERNAL)) (INIT deployEnvironment 'XYZ')
