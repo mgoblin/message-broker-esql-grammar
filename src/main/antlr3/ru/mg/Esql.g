@@ -17,19 +17,19 @@ statement	:	(var_decl | expr) ';'!
 	Variable declaration statements
 ----------------------------------------------	
 */
-var_decl	:	var_ns_decl//var_ctor_decl | var_only_decl | var_ns_decl
+var_decl	:	var_only_decl | var_ns_decl//var_ctor_decl | var_only_decl | var_ns_decl
 		;
 		
-/*var_only_decl	:	DECLARE var_name (',' var_name)* var_modifiers? type
-		->	^(DECLARE ^(type var_name var_modifiers?))+
+var_only_decl	:	DECLARE var_name (',' var_name)* var_modifier? type
+		->	^(VAR ^(var_name type var_modifier?))+
 		;
 
-var_ctor_decl	:	DECLARE var_name (',' var_name)* var_modifiers? type CONSTANT? expr
+/*var_ctor_decl	:	DECLARE var_name (',' var_name)* var_modifiers? type CONSTANT? expr
 		->	^(DECLARE ^(type var_name var_modifiers?))+ ^(INIT var_name expr)+
 		;
 */		
 var_ns_decl	:	DECLARE var_name (',' var_name)* var_modifier? NAMESPACE expr
-		->	^(NAMESPACE ^(var_name ^(INIT expr) var_modifier?))+ 
+		->	^(NAMESPACE ^(var_name var_modifier?))+ ^(INIT var_name expr)+ 
 		;		
 		
 fragment 
@@ -96,10 +96,12 @@ DEREF		:	'.';
 LABEL		:	'LABEL';
 INIT		:	':=';
 FUNC_CALL	:	'FUNC_CALL';
+VAR		:	'VAR';
 // End AST node names
 	
 // ESQL types
-type		:	BOOLEAN | DATE | TIME | GMTTIME | TIMESTAMP | GMTTIMESTAMP | CHAR | DECIMAL | FLOAT | INTEGER | REFERENCE | ROW
+type		:	T_BOOL | T_BOOLEAN | T_DATE | T_TIME | T_GMTTIME | T_TIMESTAMP | T_GMTTIMESTAMP | T_CHAR | T_CHARACTER 
+		| 	T_DEC | T_DECIMAL | T_FLOAT | T_INT | T_INTEGER  | T_ROW | T_BLOB | T_BIT | REFERENCE | T_REF
 		;
 // ESQL keywords
 ATOMIC	:	'ATOMIC';
@@ -189,19 +191,31 @@ UPDATE	:	'UPDATE';
 USER	:	'USER';
 
 // ESQL data types
-BOOLEAN	:	'BOOLEAN';
-DATE	:	'DATE';
-TIME	:	'TIME';
-GMTTIME	:	'GMTTIME';
-TIMESTAMP
+T_BIT	:	'BIT';
+T_BLOB	:	'BLOB';
+T_BOOL	:	'BOOL';	
+T_BOOLEAN
+	:	'BOOLEAN';
+T_DATE	:	'DATE';
+T_TIME	:	'TIME';
+T_GMTTIME	:	'GMTTIME';
+T_TIMESTAMP
 	:	'TIMESTAMP';
-GMTTIMESTAMP
+T_GMTTIMESTAMP
 	:	'GMTTIMESTAMP';
-CHAR	:	'CHAR';
-DECIMAL	:	'DECIMAL';
-FLOAT	:	'FLOAT';
-INTEGER	:	'INTEGER';
-ROW	:	'ROW';
+T_CHAR	:	'CHAR';
+T_CHARACTER
+	:	'CHARACTER';
+T_DEC	:	'DEC';	
+T_DECIMAL	
+	:	'DECIMAL';
+T_FLOAT	:	'FLOAT';
+T_INT	:	'INT';
+T_INTEGER	
+	:	'INTEGER';
+T_REF	:	'REF';	
+	
+T_ROW	:	'ROW';
 
 // ESQL data types values
 NULL	:	'NULL';
