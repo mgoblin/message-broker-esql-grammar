@@ -28,8 +28,8 @@ var_only_decl	:	DECLARE var_name (',' var_name)* var_modifier? type
 		->	^(DECLARE ^(type var_name var_modifiers?))+ ^(INIT var_name expr)+
 		;
 */		
-var_ns_decl	:	DECLARE var_name (',' var_name)* var_modifier? NAMESPACE expr
-		->	^(NAMESPACE ^(var_name var_modifier?))+ ^(INIT var_name expr)+ 
+var_ns_decl	:	DECLARE var_name (',' var_name)* var_modifier? (NAMESPACE | NAME) expr
+		->	^(NS ^(var_name var_modifier?))+ ^(INIT var_name expr)+ 
 		;		
 		
 fragment 
@@ -97,6 +97,7 @@ LABEL		:	'LABEL';
 INIT		:	':=';
 FUNC_CALL	:	'FUNC_CALL';
 VAR		:	'VAR';
+NS		:	'NS';
 // End AST node names
 	
 // ESQL types
@@ -152,6 +153,7 @@ LOOP	:	'LOOP';
 MESSAGE	:	'MESSAGE';
 MODULE 	:	'MODULE';
 MOVE	:	'MOVE';
+NAME	:	'NAME';
 NAMESPACE
 	:	'NAMESPACE';
 NEXTSIBLING

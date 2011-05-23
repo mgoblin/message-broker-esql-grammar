@@ -56,8 +56,9 @@ logic_expr:
 
 
 var_ns_decl:
-    "DECLARE sp1 NAMESPACE 'http://esql.ru'" -> (NAMESPACE sp1) (INIT sp1 'http://esql.ru')
-    "DECLARE sp1, sp2 SHARED NAMESPACE 'http://esql.ru'" -> (NAMESPACE (sp1 SHARED)) (NAMESPACE (sp2 SHARED)) (INIT sp1 'http://esql.ru') (INIT sp2 'http://esql.ru')
+    "DECLARE sp1 NAMESPACE 'http://esql.ru'" -> (NS sp1) (INIT sp1 'http://esql.ru')
+    "DECLARE sp1, sp2 SHARED NAMESPACE 'http://esql.ru'" -> (NS (sp1 SHARED)) (NS (sp2 SHARED)) (INIT sp1 'http://esql.ru') (INIT sp2 'http://esql.ru')
+    "DECLARE sp1 NAME 'http://esql.ru'" -> (NS sp1) (INIT sp1 'http://esql.ru')
 
 var_only_decl:
     "DECLARE deployEnvironment EXTERNAL CHARACTER" -> (VAR (deployEnvironment CHARACTER EXTERNAL))
