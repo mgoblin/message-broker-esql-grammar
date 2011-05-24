@@ -41,7 +41,19 @@ fragment
 fragment
   var_name	: 	ID | LITERAL
 		;
-// End of variable declarations		
+// End of variable declarations	
+
+
+/*
+-------------------------------------------
+	SET statement
+-------------------------------------------
+*/
+set_stat	:	SET expr
+		->	^(INIT expr )
+		;			
+// End of set statement	
+	
 
 // Expression
 expr	:	logic_expr;
