@@ -75,3 +75,34 @@ set_stat:
     "SET x = y" -> "(SET (= x y))"
     "SET s = -10" -> (SET (= s (- 10)))
     "SET s = 1 - 3/4 + 5 * 2/(1+1)" -> (SET (= s (+ (- 1 (/ 3 4)) (/ (* 5 2) (+ 1 1)))))
+
+if_stat:
+    "IF 10 = 15 THEN END IF" -> (IF (COND (= 10 15)))
+    "IF z = TRUE THEN SET x = 3 + 2; END IF" -> (IF (COND (= z TRUE) (SET (= x (+ 3 2)))))
+
+    <<
+    IF 10 <= 15 THEN
+       SET result = 'Good';
+    ELSE
+       SET result = 'Bad';
+    END IF
+     >> -> (IF (COND (<= 10 15) (SET (= result 'Good'))) (ELSE (SET (= result 'Bad'))))
+
+    <<
+    IF 10 <= 15 THEN
+       SET result = 'Good';
+    ELSEIF x = 10 THEN
+       SET x = x + 1;
+    END IF
+    >>
+    -> (IF (COND (<= 10 15) (SET (= result 'Good'))) (COND (= x 10) (SET (= x (+ x 1)))))
+
+        <<
+    IF 10 <= 15 THEN
+       SET result = 'Good';
+    ELSEIF x = 10 THEN
+       SET x = x + 1;
+    ELSE SET z = 0;
+    END IF
+    >>
+    -> (IF (COND (<= 10 15) (SET (= result 'Good'))) (COND (= x 10) (SET (= x (+ x 1)))) (ELSE (SET (= z 0))))

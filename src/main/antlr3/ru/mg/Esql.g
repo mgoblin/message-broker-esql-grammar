@@ -8,7 +8,7 @@ options {
 module	:	statement+;
 
 //Statement
-statement	:	(var_decl | set_stat) ';'!
+statement	:	(var_decl | set_stat | if_stat) ';'!
 		;
 		
 /*
@@ -51,7 +51,33 @@ fragment
 set_stat	:	SET eq_expr
 		->	^(SET eq_expr)
 		;
-// End of set statement	
+// End of set statement		
+		
+/*
+-------------------------------------------
+	If statement
+-------------------------------------------
+*/			
+
+if_stat		:	IF ifexpr THEN 
+			  statement*
+			(ELSEIF elifexpr THEN
+			  elifstatement*)*
+			(ELSE elsestatement*)?
+			END IF
+		
+		->	^(IF ^(COND ifexpr statement*) ^(COND elifexpr elifstatement*)* ^(ELSE elsestatement*)?)				 
+		;
+fragment
+  ifexpr	:	expr;
+fragment 
+  elifexpr	:	expr;
+fragment
+  elifstatement	:	statement;
+fragment
+  elsestatement	:	statement;
+// End of if statement
+	
 	
 
 // Expression
