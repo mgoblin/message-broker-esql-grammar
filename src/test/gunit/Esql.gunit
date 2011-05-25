@@ -106,3 +106,7 @@ if_stat:
     END IF
     >>
     -> (IF (COND (<= 10 15) (SET (= result 'Good'))) (COND (= x 10) (SET (= x (+ x 1)))) (ELSE (SET (= z 0))))
+
+ret_stat:
+    "RETURN" -> "RETURN"
+    "RETURN 10" -> (RETURN 10)

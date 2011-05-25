@@ -8,7 +8,7 @@ options {
 module	:	statement+;
 
 //Statement
-statement	:	(var_decl | set_stat | if_stat) ';'!
+statement	:	(var_decl | set_stat | if_stat | ret_stat) ';'!
 		;
 		
 /*
@@ -78,7 +78,8 @@ fragment
   elsestatement	:	statement;
 // End of if statement
 	
-	
+// return statement
+ret_stat	:	RETURN^ expr? ;	
 
 // Expression
 expr	:	logic_expr;
