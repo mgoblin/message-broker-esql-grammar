@@ -3,13 +3,12 @@ grammar Esql;
 options {
   language = Java;
   output = AST;
-  backtrack= true;
 }
 
 module	:	statement+;
 
 //Statement
-statement	:	(var_decl | expr) ';'! 
+statement	:	(var_decl | set_stat) ';'!
 		;
 		
 /*
@@ -49,9 +48,9 @@ fragment
 	SET statement
 -------------------------------------------
 */
-set_stat	:	SET expr
-		->	^(INIT expr )
-		;			
+set_stat	:	SET eq_expr
+		->	^(SET eq_expr)
+		;
 // End of set statement	
 	
 
@@ -60,7 +59,9 @@ expr	:	logic_expr;
 
 
 logic_expr	
-	:	sc_expr (BINARY_LOGICAL_OP^ sc_expr)*;
+	:	eq_expr (BINARY_LOGICAL_OP^ eq_expr)*;
+	
+eq_expr	:	sc_expr	(EQ_OP^ sc_expr)*;
 
 sc_expr	:	concat_expr (SIMPLE_COMPARE_OP^ concat_expr)*;
 
@@ -81,7 +82,8 @@ atom	:	ID | MINUS_OP^? INT | STRING | BOOL | NULL | LITERAL | '('! expr ')'!;
 
 // Simple comparison operators
 SIMPLE_COMPARE_OP
-	:	'>' | '<' | '>=' | '<=' | '=' | '<>';
+	:	'>' | '<' | '>=' | '<=' | '<>';
+EQ_OP	:	'=';	
 
 // Complex comparison operators
 CC_OP 	:	'BETWEEN';

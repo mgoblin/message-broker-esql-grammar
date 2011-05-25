@@ -70,3 +70,8 @@ const_decl:
 
 var_ctor_decl:
     "DECLARE v INT -10" -> (VAR (v INT)) (INIT v (- 10))
+
+set_stat:
+    "SET x = y" -> "(SET (= x y))"
+    "SET s = -10" -> (SET (= s (- 10)))
+    "SET s = 1 - 3/4 + 5 * 2/(1+1)" -> (SET (= s (+ (- 1 (/ 3 4)) (/ (* 5 2) (+ 1 1)))))
