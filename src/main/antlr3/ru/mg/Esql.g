@@ -8,7 +8,8 @@ options {
 module	:	statement+;
 
 //Statement
-statement	:	(var_decl | set_stat | if_stat | ret_stat | beginend_stat) ';'!
+statement	:	(var_decl | set_stat | if_stat | ret_stat | beginend_stat | while_stat | 
+			 attach_stat | detach_stat) ';'!
 		;
 		
 /*
@@ -103,11 +104,32 @@ while_stat	:	WHILE expr DO
 			END WHILE
 		->	^(WHILE ^(COND expr) statement*)  
 		;
+		
+/*
+-------------------------------------------
+	attach and detatch statements
+-------------------------------------------
+*/
+attach_stat	: 	ATTACH dynamic_ref TO field_ref 
+			AS sibling
+		->	^(ATTACH dynamic_ref field_ref sibling)	
+		;
+detach_stat	:	DETACH^ expr;
+
+fragment 
+  dynamic_ref	:	expr;
+fragment
+  field_ref	:	expr;
+fragment
+  sibling	:	(FIRSTCHILD | LASTCHILD | PREVIOUSSIBLING | NEXTSIBLING);  
+  
+// End of attach and detatch statements		
 
 // Expression
-expr	:	logic_expr;
+expr	:	dot_expr;
 
-
+dot_expr:	logic_expr ('.'^ logic_expr)*;
+	
 logic_expr	
 	:	eq_expr (BINARY_LOGICAL_OP^ eq_expr)*;
 	
@@ -125,7 +147,9 @@ mult_expr
 	:	ulogic_expr ( (MULT_OP^ | DIV_OP^) ulogic_expr)*;
 
 ulogic_expr	
-	:	NOT^? atom;
+	:	NOT^? arr_expr;
+	
+arr_expr:	atom ('['^ atom)* (']'!)*;	
 
 	
 atom	:	ID | MINUS_OP^? INT | STRING | BOOL | NULL | LITERAL | '('! expr ')'!;
@@ -170,6 +194,7 @@ type		:	T_BOOL | T_BOOLEAN | T_DATE | T_TIME | T_GMTTIME | T_TIMESTAMP | T_GMTTI
 		| 	T_DEC | T_DECIMAL | T_FLOAT | T_INT | T_INTEGER  | T_ROW | T_BLOB | T_BIT | REFERENCE | T_REF
 		;
 // ESQL keywords
+AS	:	'AS';
 ATOMIC	:	'ATOMIC';
 ATTACH	:	'ATTACH';
 BEGIN 	:	'BEGIN';

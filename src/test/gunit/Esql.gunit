@@ -54,6 +54,15 @@ logic_expr:
     "a > b AND x < y" -> (AND (> a b) (< x y))
     "NOT (a > b) = TRUE" -> "(= (NOT (> a b)) TRUE)"
 
+dot_expr:
+    "OutputRoot.XMLNSC.Data.Order" -> (. (. (. OutputRoot XMLNSC) Data) Order)
+
+arr_expr:
+    "Order[2]" -> ([ Order 2)
+
+expr:
+    "OutputRoot.XMLNS.Invoice.Purchases.Item[1];" -> (. (. (. (. OutputRoot XMLNS) Invoice) Purchases) ([ Item 1))
+
 
 var_ns_decl:
     "DECLARE sp1 NAMESPACE 'http://esql.ru'" -> (NS sp1) (INIT sp1 'http://esql.ru')
@@ -121,4 +130,11 @@ while_stat:
     WHILE x = TRUE DO
       SET z = z + 1;
     END WHILE;
-    >> ->   (WHILE (COND (= x TRUE)) (SET(= z (+ z 1))))
+    >>
+    ->   (WHILE (COND (= x TRUE)) (SET(= z (+ z 1))))
+
+attach_stat:
+    "ATTACH ref1 TO OutputRoot.XMLNSC.Data.Order[2] AS LASTCHILD" -> (ATTACH ref1 (. (. (. OutputRoot XMLNSC) Data) ([ Order 2)) LASTCHILD)
+
+detach_stat:
+    "DETACH ref1" -> (DETACH ref1)
