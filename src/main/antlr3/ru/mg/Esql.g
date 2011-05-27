@@ -86,12 +86,13 @@ ret_stat	:	RETURN^ expr? ;
 	begin ... end statement
 -------------------------------------------
 */
-beginend_stat	:	(label ':')? BEGIN ATOMIC?
+beginend_stat	:	(label ':')? BEGIN (NOT? ATOMIC)?
 			  statement*
 			END label?
-		->	^(BEGIN ^(PROP ^(LABEL label)? ATOMIC?) statement*)		
+		->	^(BEGIN 
+			  ^(PROPS ^(LABEL label)? ^(ATOMICITY NOT? ATOMIC)? )? 
+			  statement*)
 		;
-		
 fragment
   label		:	ID;
 // End begin ... end statement
@@ -117,7 +118,7 @@ mult_expr
 	:	ulogic_expr ( (MULT_OP^ | DIV_OP^) ulogic_expr)*;
 
 ulogic_expr	
-	:	UNARY_LOGICAL_OP^? atom;
+	:	NOT^? atom;
 
 	
 atom	:	ID | MINUS_OP^? INT | STRING | BOOL | NULL | LITERAL | '('! expr ')'!;
@@ -132,10 +133,6 @@ CC_OP 	:	'BETWEEN';
 
 // Logical binary operators
 BINARY_LOGICAL_OP : 'AND' | 'OR';
-
-// Logical unary operator
-UNARY_LOGICAL_OP
-	:	'NOT';
 
 PLUS_OP	:	'+';
 MINUS_OP:	'-';
@@ -157,7 +154,8 @@ INIT		:	':=';
 FUNC_CALL	:	'FUNC_CALL';
 VAR		:	'VAR';
 NS		:	'NS';
-PROP		:	'PROP';
+PROPS		:	'PROPS';
+ATOMICITY	:	'ATOM PROP';
 // End AST node names
 	
 // ESQL types
@@ -218,6 +216,7 @@ NAMESPACE
 	:	'NAMESPACE';
 NEXTSIBLING
 	:	'NEXTSIBLING';
+NOT	:	'NOT';	
 OF	:	'OF';
 OUT	:	'OUT';
 PARENT	:	'PARENT';

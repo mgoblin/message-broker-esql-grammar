@@ -112,6 +112,6 @@ ret_stat:
     "RETURN 10" -> (RETURN 10)
 
 beginend_stat:
-    "BEGIN END" -> (BEGIN PROP)
-    "x: BEGIN END x" -> (BEGIN (PROP (LABEL x)))
-    "x: BEGIN ATOMIC DECLARE v INT; END x" -> (BEGIN (PROP (LABEL x) ATOMIC) (VAR (v INT)))
+    "BEGIN END" -> "BEGIN"
+    "x: BEGIN END x" -> (BEGIN (PROPS (LABEL x)))
+    "x: BEGIN ATOMIC DECLARE v INT; END x" -> (BEGIN (PROPS (LABEL x) (ATOMICITY ATOMIC)) (VAR (v INT)))
