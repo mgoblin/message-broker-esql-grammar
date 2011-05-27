@@ -8,7 +8,7 @@ options {
 module	:	statement+;
 
 //Statement
-statement	:	(var_decl | set_stat | if_stat | ret_stat) ';'!
+statement	:	(var_decl | set_stat | if_stat | ret_stat | beginend_stat) ';'!
 		;
 		
 /*
@@ -81,6 +81,21 @@ fragment
 // return statement
 ret_stat	:	RETURN^ expr? ;	
 
+/*
+-------------------------------------------
+	begin ... end statement
+-------------------------------------------
+*/
+beginend_stat	:	(label ':')? BEGIN ATOMIC?
+			  statement*
+			END label?
+		->	^(BEGIN ^(PROP ^(LABEL label)? ATOMIC?) statement*)		
+		;
+		
+fragment
+  label		:	ID;
+// End begin ... end statement
+
 // Expression
 expr	:	logic_expr;
 
@@ -142,6 +157,7 @@ INIT		:	':=';
 FUNC_CALL	:	'FUNC_CALL';
 VAR		:	'VAR';
 NS		:	'NS';
+PROP		:	'PROP';
 // End AST node names
 	
 // ESQL types

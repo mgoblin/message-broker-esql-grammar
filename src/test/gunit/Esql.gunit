@@ -97,7 +97,7 @@ if_stat:
     >>
     -> (IF (COND (<= 10 15) (SET (= result 'Good'))) (COND (= x 10) (SET (= x (+ x 1)))))
 
-        <<
+    <<
     IF 10 <= 15 THEN
        SET result = 'Good';
     ELSEIF x = 10 THEN
@@ -110,3 +110,8 @@ if_stat:
 ret_stat:
     "RETURN" -> "RETURN"
     "RETURN 10" -> (RETURN 10)
+
+beginend_stat:
+    "BEGIN END" -> (BEGIN PROP)
+    "x: BEGIN END x" -> (BEGIN (PROP (LABEL x)))
+    "x: BEGIN ATOMIC DECLARE v INT; END x" -> (BEGIN (PROP (LABEL x) ATOMIC) (VAR (v INT)))
