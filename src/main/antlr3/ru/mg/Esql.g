@@ -97,6 +97,13 @@ fragment
   label		:	ID;
 // End begin ... end statement
 
+// While statement
+while_stat	:	WHILE expr DO
+			  statement*
+			END WHILE
+		->	^(WHILE ^(COND expr) statement*)  
+		;
+
 // Expression
 expr	:	logic_expr;
 

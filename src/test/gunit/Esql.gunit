@@ -115,3 +115,10 @@ beginend_stat:
     "BEGIN END" -> "BEGIN"
     "x: BEGIN END x" -> (BEGIN (PROPS (LABEL x)))
     "x: BEGIN ATOMIC DECLARE v INT; END x" -> (BEGIN (PROPS (LABEL x) (ATOMICITY ATOMIC)) (VAR (v INT)))
+
+while_stat:
+    <<
+    WHILE x = TRUE DO
+      SET z = z + 1;
+    END WHILE;
+    >> ->   (WHILE (COND (= x TRUE)) (SET(= z (+ z 1))))
