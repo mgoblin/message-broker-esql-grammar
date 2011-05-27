@@ -123,7 +123,40 @@ fragment
 fragment
   sibling	:	(FIRSTCHILD | LASTCHILD | PREVIOUSSIBLING | NEXTSIBLING);  
   
-// End of attach and detatch statements		
+// End of attach and detatch statements	
+
+/*
+-------------------------------------------
+	call statement
+-------------------------------------------
+*/
+call_stat	: 	CALL (expr '.')? routine_name '(' params? ')' qualifiers? (INTO target)?
+		->	^(CALL routine_name ^(SCHEMA expr)? ^(PARAMS params)? qualifiers?)
+		;			
+fragment
+  routine_name	: 	ID
+  		;
+fragment  		
+  qualifiers	:	in_sch | ext_sch
+		;  
+fragment
+  in_sch	:	(IN^ dbschema)
+  		;
+fragment
+  ext_sch	:	(EXTERNAL SCHEMA^ dbschema)
+  		; 		 		
+fragment
+  dbschema	:	expr;  			  		
+fragment  		
+  params	:	param (',' param)*
+		;  		  		
+fragment
+  param		:	expr
+		;
+fragment
+  target	:	expr;			
+				
+// End of call statement	
 
 // Expression
 expr	:	dot_expr;
@@ -179,14 +212,13 @@ CONCAT_OP
 -------------------------------
 */
 COND		:	'COND';
-DEREF		:	'.';
 LABEL		:	'LABEL';
 INIT		:	':=';
-FUNC_CALL	:	'FUNC_CALL';
 VAR		:	'VAR';
 NS		:	'NS';
 PROPS		:	'PROPS';
 ATOMICITY	:	'ATOM PROP';
+PARAMS		:	'PARAMS';
 // End AST node names
 	
 // ESQL types
