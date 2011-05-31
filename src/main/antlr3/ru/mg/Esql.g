@@ -9,7 +9,7 @@ module	:	statement+;
 
 //Statement
 statement	:	(var_decl | set_stat | if_stat | ret_stat | beginend_stat | while_stat | 
-			 attach_stat | detach_stat) ';'!
+			 attach_stat | detach_stat | call_stat) ';'!
 		;
 		
 /*
@@ -130,8 +130,8 @@ fragment
 	call statement
 -------------------------------------------
 */
-call_stat	: 	CALL (expr '.')? routine_name '(' params? ')' qualifiers? (INTO target)?
-		->	^(CALL routine_name ^(SCHEMA expr)? ^(PARAMS params)? qualifiers?)
+call_stat	: 	CALL dot_expr '(' params? ')' qualifiers? (INTO target)?
+		->	^(CALL dot_expr ^(PARAMS params)? qualifiers?)
 		;			
 fragment
   routine_name	: 	ID
@@ -157,6 +157,33 @@ fragment
   target	:	expr;			
 				
 // End of call statement	
+
+/*
+-------------------------------------------
+	case statement
+-------------------------------------------
+*/
+/*case_stat	:	simple_case | searched_case
+		;
+
+simple_case	:	CASE case_expr
+			  WHEN expr THEN 
+			    statement+
+			END CASE
+			ELSE statement+  
+		;
+
+searched_case	:	CASE
+			  WHEN expr THEN 
+			    statement+
+			END CASE
+			ELSE statement+  
+		;					
+		
+fragment
+  case_expr	:	expr;		
+// End of case statement
+*/
 
 // Expression
 expr	:	dot_expr;
