@@ -109,12 +109,13 @@ if_stat:
     <<
     IF 10 <= 15 THEN
        SET result = 'Good';
+       SET x = 0;
     ELSEIF x = 10 THEN
        SET x = x + 1;
     ELSE SET z = 0;
     END IF
     >>
-    -> (IF (COND (<= 10 15) (SET (= result 'Good'))) (COND (= x 10) (SET (= x (+ x 1)))) (ELSE (SET (= z 0))))
+    -> (IF (COND (<= 10 15) (SET (= result 'Good')) (SET (= x 0))) (COND (= x 10) (SET (= x (+ x 1)))) (ELSE (SET (= z 0))))
 
 ret_stat:
     "RETURN" -> "RETURN"
@@ -142,3 +143,26 @@ detach_stat:
 call_stat:
     "CALL myProc1() INTO cursor" -> (CALL myProc1)
     "CALL schema.myProc(10, 'X')" -> (CALL (. schema myProc) (PARAMS 10 , 'X'))
+
+case_stat:
+    <<
+    CASE 10 > 5
+      WHEN TRUE THEN
+        CALL procedure1(10);
+        CALL procedure1(15);
+      WHEN FALSE THEN
+        CALL procedure2(5);
+    END CASE
+    >>
+    -> (CASE (COND (> 10 5)) (WHEN TRUE (CALL procedure1 (PARAMS 10)) (CALL procedure1 (PARAMS 15))) (WHEN FALSE (CALL procedure2 (PARAMS 5))))
+
+    <<
+    CASE
+      WHEN 10 > 5 THEN
+        CALL procedure1(10);
+        CALL procedure1(15);
+      ELSE
+        CALL procedure2(5);
+    END CASE
+    >>
+    -> (CASE (WHEN (> 10 5) (CALL procedure1 (PARAMS 10)) (CALL procedure1 (PARAMS 15))) (ELSE (CALL procedure2 (PARAMS 5))))

@@ -9,7 +9,7 @@ module	:	statement+;
 
 //Statement
 statement	:	(var_decl | set_stat | if_stat | ret_stat | beginend_stat | while_stat | 
-			 attach_stat | detach_stat | call_stat) ';'!
+			 attach_stat | detach_stat | call_stat | case_stat) ';'!
 		;
 		
 /*
@@ -163,27 +163,21 @@ fragment
 	case statement
 -------------------------------------------
 */
-/*case_stat	:	simple_case | searched_case
+case_stat	:	CASE case_expr?
+			  (WHEN when_expr THEN then_sts)*
+			  (ELSE elsestatement+)?
+			END CASE  
+		->	^(CASE ^(COND case_expr)? ^(WHEN when_expr then_sts)* ^(ELSE elsestatement*)?)
 		;
-
-simple_case	:	CASE case_expr
-			  WHEN expr THEN 
-			    statement+
-			END CASE
-			ELSE statement+  
-		;
-
-searched_case	:	CASE
-			  WHEN expr THEN 
-			    statement+
-			END CASE
-			ELSE statement+  
-		;					
-		
 fragment
-  case_expr	:	expr;		
+  case_expr	:	expr;
+fragment
+  when_expr  	:	expr;
+fragment
+  then_sts	:	statement+;  
+  
 // End of case statement
-*/
+
 
 // Expression
 expr	:	dot_expr;
