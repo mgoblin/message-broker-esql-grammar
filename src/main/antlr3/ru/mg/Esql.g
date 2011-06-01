@@ -9,7 +9,7 @@ module	:	statement+;
 
 //Statement
 statement	:	(var_decl | set_stat | if_stat | ret_stat | beginend_stat | while_stat | 
-			 attach_stat | detach_stat | call_stat | case_stat) ';'!
+			 attach_stat | detach_stat | call_stat | case_stat | create_stat) ';'!
 		;
 		
 /*
@@ -179,6 +179,41 @@ fragment
 // End of case statement
 
 
+/*
+-------------------------------------------
+	create statement
+-------------------------------------------
+*/
+create_stat	:	CREATE field_clause 
+			expr (AS alias)? (DOMAIN dexpr)? props?
+		->	^(CREATE field_clause ^(AS alias)? ^(DOMAIN dexpr) ^(PROPS props)?)	
+		;
+		
+fragment 
+  props		:	(repeat_clause | from_clause | parse_clause);			
+fragment
+  field_clause	:	(FIELD | (PREVIOUSSIBLING | NEXTSIBLING | FIRSTCHILD | LASTCHILD) OF!)
+  		;					
+fragment
+  alias		:	expr
+  		;
+fragment
+  dexpr		:	expr
+   		; 
+fragment
+  repeat_clause	:	REPEAT (VALUE expr)?
+  		;
+fragment
+  from_clause	:	FROM^ expr
+  		;
+fragment
+  parse_clause	:	PARSE '(' expr (',' expr)* ')'
+  		->	^(PARSE expr*)
+  		;    		  		  		  		
+  				
+// End of create statement
+
+
 // Expression
 expr	:	dot_expr;
 
@@ -276,6 +311,7 @@ FOR	:	'FOR';
 FIELD	:	'FIELD';
 FIRSTCHILD
 	:	'FIRSTCHILD';
+FROM	:	'FROM';	
 FULL	:	'FULL';
 FUNCTION:	'FUNCTION';
 HANDLER	:	'HANDLER';
@@ -303,6 +339,7 @@ NEXTSIBLING
 	:	'NEXTSIBLING';
 NOT	:	'NOT';	
 OF	:	'OF';
+OPTIONS	:	'OPTIONS';
 OUT	:	'OUT';
 PARENT	:	'PARENT';
 PARSE	:	'PARSE';
@@ -328,6 +365,7 @@ THEN	:	'THEN';
 THROW	:	'THROW';
 TRACE	:	'TRACE';
 TO	:	'TO';
+TYPE	:	'TYPE';
 VALUE	:	'VALUE';
 VALUES	:	'VALUES';
 WHEN	:	'WHEN';
