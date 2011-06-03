@@ -173,3 +173,8 @@ create_stat:
        PARSE(inBitStream, inEncoding, inCCSID, 'DP3UK14002001',
              'TestCase', 'XML1', options)
     >> -> (CREATE LASTCHILD (DOMAIN 'MRM') (PROPS (PARSE inBitStream inEncoding inCCSID 'DP3UK14002001' 'TestCase' 'XML1' options)))
+
+func_decl_stat:
+    <<
+      CREATE FUNCTION itsFunction()
+    >> -> (FUNCTION itsFunction)

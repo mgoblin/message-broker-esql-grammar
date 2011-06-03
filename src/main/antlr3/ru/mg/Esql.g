@@ -9,7 +9,8 @@ module	:	statement+;
 
 //Statement
 statement	:	(var_decl | set_stat | if_stat | ret_stat | beginend_stat | while_stat | 
-			 attach_stat | detach_stat | call_stat | case_stat | create_stat) ';'!
+			 attach_stat | detach_stat | call_stat | case_stat | create_stat | 
+			 func_decl_stat) ';'!
 		;
 		
 /*
@@ -213,6 +214,43 @@ fragment
   				
 // End of create statement
 
+/*
+-------------------------------------------------------
+	Function and procedure declaration
+-------------------------------------------------------
+*/
+func_decl_stat	:	CREATE func_type func_name '(' params_decl? ')' (RETURNS ret_type)? (LANGUAGE language)?
+			  statement?	 
+		-> ^(func_type ^(func_name ^(PARAMS params_decl)? ^(RETURNS ret_type)? ^(LANGUAGE language)? ^(BODY statement)?))		
+		;
+fragment
+  func_name	: 	ID
+  		;
+fragment
+  func_type	:	FUNCTION | PROCEDURE
+  		;
+fragment
+  ret_type	:	type
+  		; 
+fragment
+  params_decl	:	param_decl (',' param_decl)*
+		->	(param_decl)*
+		;
+fragment
+  param_decl	:	param_modifier? param_name CONSTANT? type
+		->	^(type param_name param_modifier?)
+		;     
+fragment
+  param_modifier	
+  		:	IN | OUT | INOUT
+  		;
+fragment
+  param_name	:	ID
+  		;
+fragment
+  language	:	ESQL | DATABASE | JAVA
+  		;	  		
+
 
 // Expression
 expr	:	dot_expr;
@@ -275,6 +313,7 @@ NS		:	'NS';
 PROPS		:	'PROPS';
 ATOMICITY	:	'ATOM PROP';
 PARAMS		:	'PARAMS';
+BODY		:	'BODY';
 // End AST node names
 	
 // ESQL types
@@ -292,6 +331,7 @@ CATALOG :	'CATALOG';
 CONSTANT:	'CONSTANT';
 CONTINUE:	'CONTINUE';
 CREATE	:	'CREATE';
+DATABASE:	'DATABASE';
 DECLARE	:	'DECLARE';
 DELETE	:	'DELETE';
 DETACH	:	'DETACH';
@@ -301,6 +341,7 @@ ELSE	:	'ELSE';
 ELSEIF	:	'ELSEIF';
 END	:	'END';
 ESCAPE 	:	'ESCAPE';
+ESQL	:	'ESQL';
 EVAL	:	'EVAL';
 EVENT	:	'EVENT';
 EXCEPTION
@@ -314,6 +355,7 @@ FIRSTCHILD
 FROM	:	'FROM';	
 FULL	:	'FULL';
 FUNCTION:	'FUNCTION';
+JAVA	:	'JAVA';
 HANDLER	:	'HANDLER';
 IDENTITY:	'IDENTITY';
 IF	:	'IF';
@@ -323,6 +365,7 @@ INTO	:	'INTO';
 IS	:	'IS';
 ITERATE	:	'ITERATE';
 INOUT	:	'INOUT';
+LANGUAGE:	'LANGUAGE';
 LASTCHILD
 	:	'LASTCHILD';
 LEAVE	:	'LEAVE';
