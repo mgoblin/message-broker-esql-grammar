@@ -3,14 +3,34 @@ grammar Esql;
 options {
   language = Java;
   output = AST;
+  backtrack = true;
+  memoize = true;
 }
+
+/*
+-------------------------------
+  AST node names
+-------------------------------
+*/
+tokens {
+	COND;		
+	LABEL;		
+	INIT;		
+	VAR;		
+	NS;		
+	PROPS;		
+	ATOMICITY;	
+	PARAMS;		
+	BODY;	
+}
+// End AST node names
 
 module	:	statement+;
 
 //Statement
 statement	:	(var_decl | set_stat | if_stat | ret_stat | beginend_stat | while_stat | 
 			 attach_stat | detach_stat | call_stat | case_stat | create_stat | 
-			 func_decl_stat) ';'!
+			 func_decl_stat | handler_stat) ';'!
 		;
 		
 /*
@@ -191,7 +211,7 @@ create_stat	:	CREATE field_clause
 		;
 		
 fragment 
-  props		:	(repeat_clause | from_clause | parse_clause);			
+  props		:	(repeat_clause | from_clause | parse_clause | value_clause);			
 fragment
   field_clause	:	(FIELD | (PREVIOUSSIBLING | NEXTSIBLING | FIRSTCHILD | LASTCHILD) OF!)
   		;					
@@ -209,8 +229,14 @@ fragment
   		;
 fragment
   parse_clause	:	PARSE '(' expr (',' expr)* ')'
-  		->	^(PARSE expr*)
-  		;    		  		  		  		
+  		->	^(PARSE expr+)
+  		;
+fragment
+  value_clause	:	names_clause (VALUE expr)?
+  		;
+fragment
+  names_clause	:	((IDENTITY^ expr) | ((TYPE expr)? | (NAMESPACE expr)? | (NAME expr)? ))?
+  		;  		  		    		  		  		  		
   				
 // End of create statement
 
@@ -251,6 +277,26 @@ fragment
   language	:	ESQL | DATABASE | JAVA
   		;	  		
 
+/*
+-------------------------------------------
+	DECLARE HANDLER statement
+-------------------------------------------
+*/
+handler_stat	:	DECLARE handler_type HANDLER FOR states statement
+		->	^(HANDLER handler_type ^(FOR states) ^(BODY statement))
+		;
+fragment 
+  handler_type	:	CONTINUE | EXIT
+  		;			
+fragment 
+  states	: 	state_item (',' state_item)* 
+		-> 	state_item+
+		;
+fragment
+  state_item	:	SQLSTATE^ (VALUE^ | LIKE^)? LITERAL (ESCAPE^ LITERAL)?
+  		;  		  			
+			
+// End of DECLARE HANDLER statement
 
 // Expression
 expr	:	dot_expr;
@@ -299,22 +345,7 @@ DIV_OP	:	'/';
 
 CONCAT_OP
 	:	'||';
-	
-/*
--------------------------------
-  AST node names
--------------------------------
-*/
-COND		:	'COND';
-LABEL		:	'LABEL';
-INIT		:	':=';
-VAR		:	'VAR';
-NS		:	'NS';
-PROPS		:	'PROPS';
-ATOMICITY	:	'ATOM PROP';
-PARAMS		:	'PARAMS';
-BODY		:	'BODY';
-// End AST node names
+
 	
 // ESQL types
 type		:	T_BOOL | T_BOOLEAN | T_DATE | T_TIME | T_GMTTIME | T_TIMESTAMP | T_GMTTIMESTAMP | T_CHAR | T_CHARACTER 
@@ -403,6 +434,7 @@ SCHEMA	:	'SCHEMA';
 SET	:	'SET';
 SEVERITY:	'SEVERITY';
 SHARED	:	'SHARED';
+SQLSTATE:	'SQLSTATE';
 TERMINAL:	'TERMINAL';
 THEN	:	'THEN';
 THROW	:	'THROW';
