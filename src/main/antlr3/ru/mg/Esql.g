@@ -292,7 +292,7 @@ fragment
   states	: 	state_item (',' state_item)* 
 		-> 	state_item+
 		;
-fragment
+fragment 
   state_item	:	SQLSTATE^ (VALUE^ | LIKE^)? LITERAL (ESCAPE^ LITERAL)?
   		;  		  			
 			
@@ -326,6 +326,7 @@ arr_expr:	atom ('['^ atom)* (']'!)*;
 
 	
 atom	:	ID | MINUS_OP^? INT | STRING | BOOL | NULL | LITERAL | '('! expr ')'!;
+
 
 // Simple comparison operators
 SIMPLE_COMPARE_OP
