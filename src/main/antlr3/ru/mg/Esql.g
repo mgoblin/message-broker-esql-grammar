@@ -32,74 +32,20 @@ statement	:	(var_decl | set_stat | if_stat | ret_stat | beginend_stat | while_st
 		;
 		
 /*
-----------------------------------------------
-	DECLARE statements
-----------------------------------------------	
-*/
-var_decl	:	var_only_decl | const_decl| var_ns_decl | var_ctor_decl 
-		;
-		
-var_only_decl	:	DECLARE var_name (',' var_name)* var_modifier? type
-		->	^(VAR ^(var_name type var_modifier?))+
-		;
-const_decl	:	DECLARE var_name (',' var_name)* var_modifier? CONSTANT type expr
-		->	^(CONSTANT ^(var_name type var_modifier?))+ ^(INIT var_name expr)+	
-		;				
-
-var_ctor_decl	:	DECLARE var_name (',' var_name)* var_modifier? type expr
-		->	^(VAR ^(var_name type var_modifier?))+ ^(INIT var_name expr)+
-		;
-		
-var_ns_decl	:	DECLARE var_name (',' var_name)* var_modifier? (NAMESPACE | NAME) expr
-		->	^(NS ^(var_name var_modifier?))+ ^(INIT var_name expr)+ 
-		;		
-		
-fragment 
-  var_modifier	:	SHARED | EXTERNAL
-		;						
-fragment
-  var_name	: 	ID | LITERAL
-		;
-// End of variable declarations	
-
-
-/*
 -------------------------------------------
-	SET statement
+	attach and detatch statements
 -------------------------------------------
 */
-set_stat	:	SET eq_expr
-		->	^(SET eq_expr)
+attach_stat	: 	ATTACH dynamic_ref = expr TO field_ref = expr
+			AS sibling
+		->	^(ATTACH $dynamic_ref $field_ref sibling)	
 		;
-// End of set statement		
-		
-/*
--------------------------------------------
-	If statement
--------------------------------------------
-*/			
+detach_stat	:	DETACH^ expr;
 
-if_stat		:	IF ifexpr THEN 
-			  statement*
-			(ELSEIF elifexpr THEN
-			  elifstatement*)*
-			(ELSE elsestatement*)?
-			END IF
-		
-		->	^(IF ^(COND ifexpr statement*) ^(COND elifexpr elifstatement*)* ^(ELSE elsestatement*)?)				 
-		;
 fragment
-  ifexpr	:	expr;
-fragment 
-  elifexpr	:	expr;
-fragment
-  elifstatement	:	statement;
-fragment
-  elsestatement	:	statement;
-// End of if statement
-	
-// return statement
-ret_stat	:	RETURN^ expr? ;	
+  sibling	:	(FIRSTCHILD | LASTCHILD | PREVIOUSSIBLING | NEXTSIBLING);  
+  
+// End of attach and detatch statements	
 
 /*
 -------------------------------------------
@@ -116,41 +62,14 @@ beginend_stat	:	(label ':')? BEGIN (NOT? ATOMIC)?
 fragment
   label		:	ID;
 // End begin ... end statement
-
-// While statement
-while_stat	:	WHILE expr DO
-			  statement*
-			END WHILE
-		->	^(WHILE ^(COND expr) statement*)  
-		;
 		
-/*
--------------------------------------------
-	attach and detatch statements
--------------------------------------------
-*/
-attach_stat	: 	ATTACH dynamic_ref TO field_ref 
-			AS sibling
-		->	^(ATTACH dynamic_ref field_ref sibling)	
-		;
-detach_stat	:	DETACH^ expr;
-
-fragment 
-  dynamic_ref	:	expr;
-fragment
-  field_ref	:	expr;
-fragment
-  sibling	:	(FIRSTCHILD | LASTCHILD | PREVIOUSSIBLING | NEXTSIBLING);  
-  
-// End of attach and detatch statements	
-
 /*
 -------------------------------------------
 	call statement
 -------------------------------------------
 */
-call_stat	: 	CALL dot_expr '(' params? ')' qualifiers? (INTO target)?
-		->	^(CALL dot_expr ^(PARAMS params)? qualifiers?)
+call_stat	: 	CALL dot_expr '(' params? ')' qualifiers? (INTO expr)?
+		->	^(CALL dot_expr ^(PARAMS params)? ^(INTO expr)? qualifiers?)
 		;			
 fragment
   routine_name	: 	ID
@@ -159,22 +78,15 @@ fragment
   qualifiers	:	in_sch | ext_sch
 		;  
 fragment
-  in_sch	:	(IN^ dbschema)
+  in_sch	:	(IN^ expr)
   		;
 fragment
-  ext_sch	:	(EXTERNAL SCHEMA^ dbschema)
+  ext_sch	:	(EXTERNAL SCHEMA^ expr)
   		; 		 		
-fragment
-  dbschema	:	expr;  			  		
 fragment  		
-  params	:	param (',' param)*
-		;  		  		
-fragment
-  param		:	expr
-		;
-fragment
-  target	:	expr;			
-				
+  params	:	expr (',' expr)* 
+  		-> 	expr+
+		; 
 // End of call statement	
 
 /*
@@ -182,21 +94,19 @@ fragment
 	case statement
 -------------------------------------------
 */
-case_stat	:	CASE case_expr?
-			  (WHEN when_expr THEN then_sts)*
+case_stat	:	CASE (case_expr = expr)?
+			  (WHEN wexpr THEN then_sts)*
 			  (ELSE elsestatement+)?
 			END CASE  
-		->	^(CASE ^(COND case_expr)? ^(WHEN when_expr then_sts)* ^(ELSE elsestatement*)?)
+		->	^(CASE ^(COND $case_expr)? ^(WHEN wexpr then_sts)* ^(ELSE elsestatement*)?)
 		;
 fragment
-  case_expr	:	expr;
-fragment
-  when_expr  	:	expr;
+  wexpr		:	expr
+  		;
 fragment
   then_sts	:	statement+;  
   
 // End of case statement
-
 
 /*
 -------------------------------------------
@@ -239,9 +149,9 @@ fragment
 	Function and procedure declaration
 -------------------------------------------------------
 */
-func_decl_stat	:	CREATE func_type func_name '(' params_decl? ')' (RETURNS ret_type)? (LANGUAGE language)?
+func_decl_stat	:	CREATE func_type func_name '(' params_decl? ')' (RETURNS type)? (LANGUAGE language)?
 			  statement?	 
-		-> ^(func_type ^(func_name ^(PARAMS params_decl)? ^(RETURNS ret_type)? ^(LANGUAGE language)? ^(BODY statement)?))		
+		-> ^(func_type ^(func_name ^(PARAMS params_decl)? ^(RETURNS type)? ^(LANGUAGE language)? ^(BODY statement)?))		
 		;
 fragment
   func_name	: 	ID
@@ -249,9 +159,6 @@ fragment
 fragment
   func_type	:	FUNCTION | PROCEDURE
   		;
-fragment
-  ret_type	:	type
-  		; 
 fragment
   params_decl	:	param_decl (',' param_decl)*
 		->	(param_decl)*
@@ -270,6 +177,37 @@ fragment
 fragment
   language	:	ESQL | DATABASE | JAVA
   		;	  		
+
+/*
+----------------------------------------------
+	DECLARE statements
+----------------------------------------------	
+*/
+var_decl	:	var_only_decl | const_decl| var_ns_decl | var_ctor_decl 
+		;
+		
+var_only_decl	:	DECLARE var_name (',' var_name)* var_modifier? type
+		->	^(VAR ^(var_name type var_modifier?))+
+		;
+const_decl	:	DECLARE var_name (',' var_name)* var_modifier? CONSTANT type expr
+		->	^(CONSTANT ^(var_name type var_modifier?))+ ^(INIT var_name expr)+	
+		;				
+
+var_ctor_decl	:	DECLARE var_name (',' var_name)* var_modifier? type expr
+		->	^(VAR ^(var_name type var_modifier?))+ ^(INIT var_name expr)+
+		;
+		
+var_ns_decl	:	DECLARE var_name (',' var_name)* var_modifier? (NAMESPACE | NAME) expr
+		->	^(NS ^(var_name var_modifier?))+ ^(INIT var_name expr)+ 
+		;		
+		
+fragment 
+  var_modifier	:	SHARED | EXTERNAL
+		;						
+fragment
+  var_name	: 	ID | LITERAL
+		;
+// End of variable declarations	
 
 /*
 -------------------------------------------
@@ -291,6 +229,55 @@ fragment
   		;  		  			
 			
 // End of DECLARE HANDLER statement
+
+/*
+-------------------------------------------
+	If statement
+-------------------------------------------
+*/			
+
+if_stat		:	IF ifexpr THEN 
+			  statement*
+			(ELSEIF elifexpr THEN
+			  elifstatement*)*
+			(ELSE elsestatement*)?
+			END IF
+		
+		->	^(IF ^(COND ifexpr statement*) ^(COND elifexpr elifstatement*)* ^(ELSE elsestatement*)?)				 
+		;
+fragment
+  ifexpr	:	expr;
+fragment 
+  elifexpr	:	expr;
+fragment
+  elifstatement	:	statement;
+fragment
+  elsestatement	:	statement;
+// End of if statement
+
+// return statement
+ret_stat	:	RETURN^ expr? ;	
+
+/*
+-------------------------------------------
+	SET statement
+-------------------------------------------
+*/
+set_stat	:	SET eq_expr
+		->	^(SET eq_expr)
+		;
+// End of set statement		
+		
+
+// While statement
+while_stat	:	WHILE expr DO
+			  statement*
+			END WHILE
+		->	^(WHILE ^(COND expr) statement*)  
+		;
+		
+
+
 
 // Expression
 expr	:	dot_expr;

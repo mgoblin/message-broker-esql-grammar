@@ -141,8 +141,8 @@ detach_stat:
     "DETACH ref1" -> (DETACH ref1)
 
 call_stat:
-    "CALL myProc1() INTO cursor" -> (CALL myProc1)
-    "CALL schema.myProc(10, 'X')" -> (CALL (. schema myProc) (PARAMS 10 , 'X'))
+    "CALL myProc1() INTO cursor" -> (CALL myProc1 (INTO cursor))
+    "CALL schema.myProc(10, 'X')" -> (CALL (. schema myProc) (PARAMS 10 'X'))
 
 case_stat:
     <<
