@@ -3,8 +3,6 @@ grammar Esql;
 options {
   language = Java;
   output = AST;
-  backtrack = true;
-  memoize = true;
 }
 
 /*
@@ -205,38 +203,34 @@ fragment
 	create statement
 -------------------------------------------
 */
-create_stat	:	CREATE field_clause 
-			expr (AS alias)? (DOMAIN dexpr)? props?
-		->	^(CREATE field_clause ^(AS alias)? ^(DOMAIN dexpr) ^(PROPS props)?)	
+create_stat	:	CREATE qualifier 
+			trg = expr 
+			(AS alias = expr)? 
+			(DOMAIN dexpr = expr)? props_clause
+		->	^(CREATE qualifier $trg ^(AS $alias)? ^(DOMAIN $dexpr)? ^(PROPS props_clause)?)	
 		;
-		
-fragment 
-  props		:	(repeat_clause | from_clause | parse_clause | value_clause);			
 fragment
-  field_clause	:	(FIELD | (PREVIOUSSIBLING | NEXTSIBLING | FIRSTCHILD | LASTCHILD) OF!)
-  		;					
+  props_clause	:	values_clause | from_clause | parse_clause
+  		;	
 fragment
-  alias		:	expr
-  		;
+  qualifier	:	FIELD | ((PREVIOUSSIBLING | NEXTSIBLING | FIRSTCHILD | LASTCHILD) OF!)
+		;
 fragment
-  dexpr		:	expr
-   		; 
-fragment
-  repeat_clause	:	REPEAT (VALUE expr)?
-  		;
-fragment
-  from_clause	:	FROM^ expr
+  from_clause	:	FROM expr
   		;
 fragment
   parse_clause	:	PARSE '(' expr (',' expr)* ')'
   		->	^(PARSE expr+)
+  		;		
+fragment
+  values_clause	:	REPEAT	| ident_clause | type_clause (VALUE expr)?
   		;
 fragment
-  value_clause	:	names_clause (VALUE expr)?
+  ident_clause	:	IDENTITY^ dot_expr 
   		;
 fragment
-  names_clause	:	((IDENTITY^ expr) | ((TYPE expr)? | (NAMESPACE expr)? | (NAME expr)? ))?
-  		;  		  		    		  		  		  		
+  type_clause	:	(TYPE expr)? (NAMESPACE expr)? (NAME expr)?
+  		;  		  		  		    		  		  		  		
   				
 // End of create statement
 
