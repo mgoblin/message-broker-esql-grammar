@@ -19,7 +19,7 @@ tokens {
 	PROPS;		
 	ATOMICITY;	
 	PARAMS;		
-	BODY;	
+	BODY;
 }
 // End AST node names
 
@@ -28,7 +28,7 @@ module	:	statement+;
 //Statement
 statement	:	(var_decl | set_stat | if_stat | ret_stat | beginend_stat | while_stat | 
 			 attach_stat | detach_stat | call_stat | case_stat | create_stat | 
-			 func_decl_stat | handler_stat) ';'!
+			 func_decl_stat | handler_stat | delete_from_stat) ';'!
 		;
 		
 /*
@@ -232,6 +232,27 @@ fragment
 
 /*
 -------------------------------------------
+	DELETE FROM statement
+-------------------------------------------
+*/
+delete_from_stat:	DELETE FROM table_ref (AS ID)? where_clause?
+		->	^(DELETE table_ref ^(AS ID)? where_clause?)
+		;
+fragment
+  table_ref	:	DATABASE ('.' data_source_clause)+
+  		->	^(DATABASE data_source_clause)+
+  		;
+fragment
+  data_source_clause
+  		:	ID | ('{'! expr '}'!)
+  		;
+fragment
+  where_clause	:	WHERE^ expr
+  		;  		 		  				 
+// End of delete from statement
+
+/*
+-------------------------------------------
 	If statement
 -------------------------------------------
 */			
@@ -426,6 +447,7 @@ TYPE	:	'TYPE';
 VALUE	:	'VALUE';
 VALUES	:	'VALUES';
 WHEN	:	'WHEN';
+WHERE	:	'WHERE';
 WHILE	:	'WHILE';
 UNTIL	:	'UNTIL';
 UPDATE	:	'UPDATE';
