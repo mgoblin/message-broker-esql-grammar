@@ -59,6 +59,7 @@ dot_expr:
 
 arr_expr:
     "Order[2]" -> ([ Order 2)
+    "Order[]" -> ([ Order)
 
 expr:
     "OutputRoot.XMLNS.Invoice.Purchases.Item[1];" -> (. (. (. (. OutputRoot XMLNS) Invoice) Purchases) ([ Item 1))
@@ -200,3 +201,11 @@ delete_stat:
 
 eval_stat:
     "EVAL('SET ' || scalarVar1 || ' = 2;')" -> (EVAL (|| (|| 'SET ' scalarVar1) ' = 2;'))
+
+for_stat:
+    <<
+    FOR source AS Environment.SourceData.Folder[] DO
+     SET i = i + 1;
+    END FOR
+    >>
+    -> (FOR source (AS (. (. Environment SourceData) ([ Folder))) (SET (= i (+ i 1))))

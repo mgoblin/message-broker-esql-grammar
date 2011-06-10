@@ -28,7 +28,8 @@ module	:	statement+;
 //Statement
 statement	:	(var_decl | set_stat | if_stat | ret_stat | beginend_stat | while_stat | 
 			 attach_stat | detach_stat | call_stat | case_stat | create_stat | 
-			 func_decl_stat | handler_stat | delete_from_stat | delete_stat | eval_stat) ';'!
+			 func_decl_stat | handler_stat | delete_from_stat | delete_stat | eval_stat |
+			 for_stat) ';'!
 		;
 		
 /*
@@ -269,7 +270,18 @@ detach_stat	:	DETACH^ expr;
 -------------------------------------------
 */		
 eval_stat	:	EVAL^ '('! expr ')'!
-		;		
+		;
+		
+/*
+-------------------------------------------
+	For statement
+-------------------------------------------
+*/
+for_stat	:	FOR expr AS alias = expr DO
+			  statement+
+			END FOR
+		->	^(FOR expr ^(AS $alias) statement+)
+		;							
 		
 /*
 -------------------------------------------
@@ -344,7 +356,7 @@ mult_expr
 ulogic_expr	
 	:	NOT^? arr_expr;
 	
-arr_expr:	atom ('['^ atom)* (']'!)*;	
+arr_expr:	atom ('['^ atom? ']'!)*;	
 
 	
 atom	:	ID | MINUS_OP^? INT | STRING | BOOL | NULL | LITERAL | '('! expr ')'!;
