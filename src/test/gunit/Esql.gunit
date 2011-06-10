@@ -196,3 +196,7 @@ delete_from_stat:
 
 delete_stat:
     "DELETE FIELD OutputRoot.XMLNS.Data.Folder1.Folder12" -> (DELETE FIELD (. (. (. (. OutputRoot XMLNS) Data) Folder1) Folder12))
+    "DELETE LASTCHILD OF Cursor" -> (DELETE LASTCHILD Cursor)
+
+eval_stat:
+    "EVAL('SET ' || scalarVar1 || ' = 2;')" -> (EVAL (|| (|| 'SET ' scalarVar1) ' = 2;'))

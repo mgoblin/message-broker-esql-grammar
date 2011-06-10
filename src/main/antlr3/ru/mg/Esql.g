@@ -28,20 +28,18 @@ module	:	statement+;
 //Statement
 statement	:	(var_decl | set_stat | if_stat | ret_stat | beginend_stat | while_stat | 
 			 attach_stat | detach_stat | call_stat | case_stat | create_stat | 
-			 func_decl_stat | handler_stat | delete_from_stat | delete_stat) ';'!
+			 func_decl_stat | handler_stat | delete_from_stat | delete_stat | eval_stat) ';'!
 		;
 		
 /*
 -------------------------------------------
-	attach and detatch statements
+	attach statement
 -------------------------------------------
 */
 attach_stat	: 	ATTACH dynamic_ref = expr TO field_ref = expr
 			AS sibling
 		->	^(ATTACH $dynamic_ref $field_ref sibling)	
 		;
-detach_stat	:	DETACH^ expr;
-
 fragment
   sibling	:	(FIRSTCHILD | LASTCHILD | PREVIOUSSIBLING | NEXTSIBLING);  
   
@@ -253,11 +251,25 @@ fragment
 
 /*
 -------------------------------------------
-	DELETE FROM statement
+	DELETE statement
 -------------------------------------------
 */
 delete_stat	:	DELETE^ qualifier expr
 		;
+/*
+-------------------------------------------
+	DETACH statement
+-------------------------------------------
+*/		
+detach_stat	:	DETACH^ expr;
+
+/*
+-------------------------------------------
+	DETACH statement
+-------------------------------------------
+*/		
+eval_stat	:	EVAL^ '('! expr ')'!
+		;		
 		
 /*
 -------------------------------------------
