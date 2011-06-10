@@ -193,3 +193,6 @@ handler_stat:
 delete_from_stat:
     "DELETE FROM DATABASE.SHAREHOLDINGS AS S WHERE S.ACCOUNTNO = InputBody.AccountNumber"
     ->(DELETE (DATABASE SHAREHOLDINGS) (AS S) (WHERE (. (. S (= ACCOUNTNO InputBody)) AccountNumber)))
+
+delete_stat:
+    "DELETE FIELD OutputRoot.XMLNS.Data.Folder1.Folder12" -> (DELETE FIELD (. (. (. (. OutputRoot XMLNS) Data) Folder1) Folder12))

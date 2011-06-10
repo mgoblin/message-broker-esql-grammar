@@ -28,7 +28,7 @@ module	:	statement+;
 //Statement
 statement	:	(var_decl | set_stat | if_stat | ret_stat | beginend_stat | while_stat | 
 			 attach_stat | detach_stat | call_stat | case_stat | create_stat | 
-			 func_decl_stat | handler_stat | delete_from_stat) ';'!
+			 func_decl_stat | handler_stat | delete_from_stat | delete_stat) ';'!
 		;
 		
 /*
@@ -251,6 +251,14 @@ fragment
   		;  		 		  				 
 // End of delete from statement
 
+/*
+-------------------------------------------
+	DELETE FROM statement
+-------------------------------------------
+*/
+delete_stat	:	DELETE^ qualifier expr
+		;
+		
 /*
 -------------------------------------------
 	If statement
