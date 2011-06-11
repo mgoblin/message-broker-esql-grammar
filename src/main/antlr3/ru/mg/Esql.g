@@ -378,7 +378,11 @@ move_stat	:	MOVE^ trg = expr to_clause
 		;
 fragment
   to_clause	:	(TO^ expr) | PARENT^ | (sibling^ (type_clause | ident_clause | REPEAT^ TYPE? NAME?))
-  		;	
+  		;
+  		
+
+resignal_stat	:	RESIGNAL^
+		;  			
   					
 // return statement
 ret_stat	:	RETURN^ expr? ;	
