@@ -322,7 +322,15 @@ fragment
 fragment
   value		:	expr
   		;	  		
-// End of insert statement  		
+// End of insert statement
+
+/*
+-------------------------------------------
+	Iterate statement
+-------------------------------------------
+*/			
+iterate_stat	:	ITERATE^ label
+		;  		
   		
   					
 // return statement

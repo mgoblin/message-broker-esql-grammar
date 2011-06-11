@@ -215,3 +215,6 @@ for_stat:
 insert_stat:
     "INSERT INTO DATABASE.{Source}.{Schema}.{Table} (Name, Value) VALUES ('Joe', 12)"
     -> (INSERT (DATABASE Source Schema Table) (PARAMS Name Value) (VALUES 'Joe' 12))
+
+iterate_stat:
+    "ITERATE X" -> (ITERATE X)
