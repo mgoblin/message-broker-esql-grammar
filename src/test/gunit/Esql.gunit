@@ -218,3 +218,6 @@ insert_stat:
 
 iterate_stat:
     "ITERATE X" -> (ITERATE X)
+
+leave_stat:
+    "LEAVE X" -> (LEAVE X)
