@@ -236,3 +236,7 @@ loop_stat:
     END LOOP X;
     >>
     -> (LOOP (PROPS X) (SET (= i (+ i 1))))
+
+move_stat:
+    "MOVE cursor FIRSTCHILD TYPE XML.Name 'Field1'" -> (MOVE cursor (FIRSTCHILD TYPE (. XML Name)))
+    "MOVE sourceCursor NEXTSIBLING REPEAT TYPE NAME" -> (MOVE sourceCursor (REPEAT NEXTSIBLING TYPE NAME))
