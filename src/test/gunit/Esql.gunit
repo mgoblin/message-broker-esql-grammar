@@ -194,6 +194,8 @@ handler_stat:
 delete_from_stat:
     "DELETE FROM DATABASE.SHAREHOLDINGS AS S WHERE S.ACCOUNTNO = InputBody.AccountNumber"
     ->(DELETE (DATABASE SHAREHOLDINGS) (AS S) (WHERE (. (. S (= ACCOUNTNO InputBody)) AccountNumber)))
+    "DELETE FROM DATABASE.{Source}.{Schema}.{Table}" -> (DELETE (DATABASE Source Schema Table))
+
 
 delete_stat:
     "DELETE FIELD OutputRoot.XMLNS.Data.Folder1.Folder12" -> (DELETE FIELD (. (. (. (. OutputRoot XMLNS) Data) Folder1) Folder12))
@@ -209,3 +211,7 @@ for_stat:
     END FOR
     >>
     -> (FOR source (AS (. (. Environment SourceData) ([ Folder))) (SET (= i (+ i 1))))
+
+insert_stat:
+    "INSERT INTO DATABASE.{Source}.{Schema}.{Table} (Name, Value) VALUES ('Joe', 12)"
+    -> (INSERT (DATABASE Source Schema Table) (PARAMS Name Value) (VALUES 'Joe' 12))

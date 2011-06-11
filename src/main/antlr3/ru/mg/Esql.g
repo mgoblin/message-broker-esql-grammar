@@ -29,7 +29,7 @@ module	:	statement+;
 statement	:	(var_decl | set_stat | if_stat | ret_stat | beginend_stat | while_stat | 
 			 attach_stat | detach_stat | call_stat | case_stat | create_stat | 
 			 func_decl_stat | handler_stat | delete_from_stat | delete_stat | eval_stat |
-			 for_stat) ';'!
+			 for_stat | insert_stat) ';'!
 		;
 		
 /*
@@ -239,7 +239,7 @@ delete_from_stat:	DELETE FROM table_ref (AS ID)? where_clause?
 		;
 fragment
   table_ref	:	DATABASE ('.' data_source_clause)+
-  		->	^(DATABASE data_source_clause)+
+  		->	^(DATABASE data_source_clause+)
   		;
 fragment
   data_source_clause
@@ -308,6 +308,23 @@ fragment
   elsestatement	:	statement;
 // End of if statement
 
+/*
+-------------------------------------------
+	Insert statement
+-------------------------------------------
+*/			
+insert_stat	:	INSERT INTO table_ref '(' column_name (',' column_name)* ')' VALUES '(' value (',' value)* ')'
+		->	^(INSERT table_ref ^(PARAMS column_name+) ^(VALUES value+)) 
+		;
+fragment
+  column_name	:	ID | LITERAL
+  		;
+fragment
+  value		:	expr
+  		;	  		
+// End of insert statement  		
+  		
+  					
 // return statement
 ret_stat	:	RETURN^ expr? ;	
 
