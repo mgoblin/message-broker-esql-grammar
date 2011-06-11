@@ -29,7 +29,7 @@ module	:	statement+;
 statement	:	(var_decl | set_stat | if_stat | ret_stat | beginend_stat | while_stat | 
 			 attach_stat | detach_stat | call_stat | case_stat | create_stat | 
 			 func_decl_stat | handler_stat | delete_from_stat | delete_stat | eval_stat |
-			 for_stat | insert_stat | iterate_stat | leave_stat | log_stat) ';'!
+			 for_stat | insert_stat | iterate_stat | leave_stat | log_stat | loop_stat) ';'!
 		;
 		
 /*
@@ -340,18 +340,33 @@ leave_stat	:	LEAVE^ label
 -------------------------------------------
 */
 log_stat	:	LOG log_type log_kind? log_options (VALUES  '('value (',' value)* ')' )?
-		->	^(LOG ^(PROPS log_type log_options log_kind?) ^(VALUES value+)?)
+		->	^(LOG ^(PROPS log_type log_options? log_kind?) ^(VALUES value+)?)
 		;	
 fragment
-  log_type	:	EVENT | USER TRACE
+  log_type	:	EVENT | (USER! TRACE)
   		;
 fragment
   log_kind	:	FULL? EXCEPTION -> ^(EXCEPTION FULL?)
   		;  		
 fragment
-  log_options	:	(SEVERITY severity = expr)? (CATALOG catalog = expr)? (MESSAGE msg = expr)?
-  		-> 	^(SEVERITY $severity) ^(CATALOG $catalog) ^(MESSAGE $msg)
-  		;  		 						  		
+  log_options	:	(SEVERITY expr)? (CATALOG expr)? (MESSAGE expr)?
+  		; 
+// End of LOG statement
+
+loop_stat	:	s_loop | l_loop
+		;
+fragment
+  s_loop	:	LOOP 
+  			  statement*
+  			END LOOP
+		->	^(LOOP statement*)  			
+  		;
+fragment
+  l_loop	:	label ':' LOOP
+  			  statement*
+  			END LOOP label
+  		-> 	^(LOOP ^(PROPS label) statement*)	  
+  		;		 		 						  		
   		
   					
 // return statement
