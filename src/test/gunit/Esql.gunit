@@ -244,3 +244,6 @@ move_stat:
 pass_stat:
     "PASSTHRU 'DROP TABLE Shop.Customers' TO DATABASE.DSN1" -> (PASSTHRU 'DROP TABLE Shop.Customers' (TO (DATABASE DSN1)))
     "PASSTHRU(myVar)" -> (PASSTHRU myVar)
+
+propagate_stat:
+    "PROPAGATE" -> (PROPAGATE)

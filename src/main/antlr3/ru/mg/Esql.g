@@ -11,8 +11,7 @@ options {
 -------------------------------
 */
 tokens {
-	COND;		
-	LABEL;		
+	COND;				
 	INIT;		
 	VAR;		
 	NS;		
@@ -30,7 +29,7 @@ statement	:	(var_decl | set_stat | if_stat | ret_stat | beginend_stat | while_st
 			 attach_stat | detach_stat | call_stat | case_stat | create_stat | 
 			 func_decl_stat | handler_stat | delete_from_stat | delete_stat | eval_stat |
 			 for_stat | insert_stat | iterate_stat | leave_stat | log_stat | loop_stat | 
-			 move_stat | pass_stat) ';'!
+			 move_stat | pass_stat |  propagate_stat) ';'!
 		;
 		
 /*
@@ -147,7 +146,7 @@ fragment
 /*
 -------------------------------------------------------
 	Function and procedure declaration
--------------------------------------------------------
+-------------------------------------------------------propagate_stat
 */
 func_decl_stat	:	CREATE func_type func_name '(' params_decl? ')' (RETURNS type)? (LANGUAGE language)?
 			  statement?	 
@@ -401,7 +400,33 @@ fragment
 fragment
   values	:	expr (',' expr)*  
   		-> 	expr+
-  		;  		 		
+  		;
+// End of PASSTHRU statement
+
+/*
+-------------------------------------------
+	PROPAGATE statement
+-------------------------------------------
+*/
+propagate_stat	:	PROPAGATE propagate_to? msg_src controls?
+		->	^(PROPAGATE propagate_to? msg_src controls?)
+		;
+fragment
+  propagate_to	:	TO (TERMINAL term= expr) | (LABEL lbl = expr)
+  		->	^(TO (TERMINAL $term)? (LABEL $lbl)?)
+  		;
+fragment
+  msg_src	:	(ENVIRONMENT^ expr)? (MESSAGE^ expr)? (EXCEPTION^ expr)?	
+  		;
+fragment
+  controls	:	fin | del
+  		;
+fragment
+  fin		:	FINALIZE^  (DEFAULT | NONE)?
+  		;
+fragment
+  del		:	DELETE^ (DEFAULT | NONE)?
+  		;  		
 		  		
 
 resignal_stat	:	RESIGNAL^
@@ -498,6 +523,7 @@ CONTINUE:	'CONTINUE';
 CREATE	:	'CREATE';
 DATABASE:	'DATABASE';
 DECLARE	:	'DECLARE';
+DEFAULT	:	'DEFAULT';
 DELETE	:	'DELETE';
 DETACH	:	'DETACH';
 DO	:	'DO';
@@ -505,6 +531,8 @@ DOMAIN 	:	'DOMAIN';
 ELSE	:	'ELSE';
 ELSEIF	:	'ELSEIF';
 END	:	'END';
+ENVIRONMENT
+	:	'ENVIRONMENT';	
 ESCAPE 	:	'ESCAPE';
 ESQL	:	'ESQL';
 EVAL	:	'EVAL';
@@ -515,6 +543,7 @@ EXIT	:	'EXIT';
 EXTERNAL:	'EXTERNAL';
 FOR	:	'FOR';
 FIELD	:	'FIELD';
+FINALIZE:	'FINALIZE';
 FIRSTCHILD
 	:	'FIRSTCHILD';
 FROM	:	'FROM';	
@@ -530,6 +559,7 @@ INTO	:	'INTO';
 IS	:	'IS';
 ITERATE	:	'ITERATE';
 INOUT	:	'INOUT';
+LABEL	:	'LABEL';
 LANGUAGE:	'LANGUAGE';
 LASTCHILD
 	:	'LASTCHILD';
@@ -545,6 +575,7 @@ NAMESPACE
 	:	'NAMESPACE';
 NEXTSIBLING
 	:	'NEXTSIBLING';
+NONE	:	'NONE';
 NOT	:	'NOT';	
 OF	:	'OF';
 OPTIONS	:	'OPTIONS';
