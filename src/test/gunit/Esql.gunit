@@ -247,3 +247,10 @@ pass_stat:
 
 propagate_stat:
     "PROPAGATE" -> "PROPAGATE"
+
+module_stat:
+    <<
+    CREATE COMPUTE MODULE name
+
+    END MODULE
+    >>    -> (MODULE name COMPUTE)
