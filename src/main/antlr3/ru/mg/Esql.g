@@ -30,7 +30,7 @@ statement	:	(var_decl | set_stat | if_stat | ret_stat | beginend_stat | while_st
 			 attach_stat | detach_stat | call_stat | case_stat | create_stat | 
 			 func_decl_stat | handler_stat | delete_from_stat | delete_stat | eval_stat |
 			 for_stat | insert_stat | iterate_stat | leave_stat | log_stat | loop_stat | 
-			 move_stat) ';'!
+			 move_stat | pass_stat) ';'!
 		;
 		
 /*
@@ -353,6 +353,7 @@ fragment
   log_options	:	(SEVERITY expr)? (CATALOG expr)? (MESSAGE expr)?
   		; 
 // End of LOG statement
+
 /*
 -------------------------------------------
 	LOOP statement
@@ -374,12 +375,34 @@ fragment
   		;
 // End of LOOP statement  		
   				 		 						  		
+/*
+-------------------------------------------
+	MOVE statement
+-------------------------------------------
+*/
 move_stat	:	MOVE^ trg = expr to_clause
 		;
 fragment
   to_clause	:	(TO^ expr) | PARENT^ | (sibling^ (type_clause | ident_clause | REPEAT^ TYPE? NAME?))
   		;
-  		
+// End of MOVE statement
+
+/*
+-------------------------------------------
+	PASSTHRU statement
+-------------------------------------------
+*/
+pass_stat	:	PASSTHRU^  db_clause | ('('! values ')'!)
+		;
+fragment
+  db_clause	:	expr (TO table_ref)? (VALUES values)?
+  		->	expr ^(TO table_ref)? ^(VALUES values)?
+  		;
+fragment
+  values	:	expr (',' expr)*  
+  		-> 	expr+
+  		;  		 		
+		  		
 
 resignal_stat	:	RESIGNAL^
 		;  			

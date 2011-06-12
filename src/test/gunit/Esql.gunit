@@ -240,3 +240,7 @@ loop_stat:
 move_stat:
     "MOVE cursor FIRSTCHILD TYPE XML.Name 'Field1'" -> (MOVE cursor (FIRSTCHILD TYPE (. XML Name)))
     "MOVE sourceCursor NEXTSIBLING REPEAT TYPE NAME" -> (MOVE sourceCursor (REPEAT NEXTSIBLING TYPE NAME))
+
+pass_stat:
+    "PASSTHRU 'DROP TABLE Shop.Customers' TO DATABASE.DSN1" -> (PASSTHRU 'DROP TABLE Shop.Customers' (TO (DATABASE DSN1)))
+    "PASSTHRU(myVar)" -> (PASSTHRU myVar)
