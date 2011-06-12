@@ -246,4 +246,4 @@ pass_stat:
     "PASSTHRU(myVar)" -> (PASSTHRU myVar)
 
 propagate_stat:
-    "PROPAGATE" -> (PROPAGATE)
+    "PROPAGATE" -> "PROPAGATE"

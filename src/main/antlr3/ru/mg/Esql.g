@@ -408,15 +408,15 @@ fragment
 	PROPAGATE statement
 -------------------------------------------
 */
-propagate_stat	:	PROPAGATE propagate_to? msg_src controls?
-		->	^(PROPAGATE propagate_to? msg_src controls?)
+propagate_stat	:	PROPAGATE (propagate_to msg_src)?
+		->	^(PROPAGATE propagate_to? msg_src?)
 		;
 fragment
   propagate_to	:	TO (TERMINAL term= expr) | (LABEL lbl = expr)
-  		->	^(TO (TERMINAL $term)? (LABEL $lbl)?)
+  		->	^(TO (TERMINAL $term)? (LABEL $lbl)? )
   		;
 fragment
-  msg_src	:	(ENVIRONMENT^ expr)? (MESSAGE^ expr)? (EXCEPTION^ expr)?	
+  msg_src	:	(ENVIRONMENT^ expr)? (MESSAGE^ expr)? (EXCEPTION^ expr)? (FINALIZE | DELETE (DEFAULT | NONE)?)?
   		;
 fragment
   controls	:	fin | del
@@ -426,7 +426,8 @@ fragment
   		;
 fragment
   del		:	DELETE^ (DEFAULT | NONE)?
-  		;  		
+  		;
+  		  		
 		  		
 
 resignal_stat	:	RESIGNAL^
