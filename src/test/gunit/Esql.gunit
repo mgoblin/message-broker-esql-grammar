@@ -254,3 +254,13 @@ module_stat:
 
     END MODULE
     >>    -> (MODULE name COMPUTE)
+
+repeat_stat:
+    <<
+    X : REPEAT
+      SET i = i + 1;
+    UNTIL
+       i>= 3
+    END REPEAT X
+    >>
+    -> (REPEAT (PROPS X) (>= i 3) (SET (= i (+ i 1))))

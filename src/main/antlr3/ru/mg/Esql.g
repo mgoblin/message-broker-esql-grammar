@@ -29,7 +29,7 @@ statement	:	(var_decl | set_stat | if_stat | ret_stat | beginend_stat | while_st
 			 attach_stat | detach_stat | call_stat | case_stat | create_stat | 
 			 func_decl_stat | handler_stat | delete_from_stat | delete_stat | eval_stat |
 			 for_stat | insert_stat | iterate_stat | leave_stat | log_stat | loop_stat | 
-			 move_stat | pass_stat |  propagate_stat | module_stat) ';'!
+			 move_stat | pass_stat |  propagate_stat | module_stat | repeat_stat) ';'!
 		;
 		
 /*
@@ -159,7 +159,7 @@ module_type	:	'COMPUTE' | 'DATABASE' | 'FILTER';
 	
 module_name 	:	ID;
 
-// End module declaration
+// End module declarationrepeat_stat
 
 /*
 -------------------------------------------------------
@@ -445,8 +445,30 @@ fragment
 fragment
   del		:	DELETE^ (DEFAULT | NONE)?
   		;
-  		  		
-		  		
+  		
+/*
+-------------------------------------------
+	REPEAT statement
+-------------------------------------------
+*/
+repeat_stat	:	s_repeat | l_repeat
+		;
+		
+s_repeat	:	REPEAT
+			  statement*
+			UNTIL expr
+			END REPEAT
+		->	^(REPEAT expr statement*)	
+		;
+		
+l_repeat	:	label ':' 
+			REPEAT
+			  statement*
+			UNTIL expr
+			END REPEAT label
+		-> 	^(REPEAT ^(PROPS label) expr statement*)
+		;		  		
+// End of  REPEATE statement		  		 		
 
 resignal_stat	:	RESIGNAL^
 		;  			
