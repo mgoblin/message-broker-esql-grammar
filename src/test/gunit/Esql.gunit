@@ -264,3 +264,6 @@ repeat_stat:
     END REPEAT X
     >>
     -> (REPEAT (PROPS X) (>= i 3) (SET (= i (+ i 1))))
+
+resignal_stat:
+    "RESIGNAL" -> "RESIGNAL"
