@@ -22,7 +22,8 @@ tokens {
 }
 // End AST node names
 
-module	:	statement+;
+module	:	var_decl+
+		module_stat;
 
 //Statement
 statement	:	(var_decl | set_stat | if_stat | ret_stat | beginend_stat | while_stat | 
