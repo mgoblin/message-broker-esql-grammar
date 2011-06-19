@@ -519,14 +519,21 @@ fragment
 // End of UPDATE statement				
 
 // While statement
-while_stat	:	WHILE expr DO
+while_stat	:	s_while | l_while
+		;
+fragment
+  s_while	:	WHILE expr DO
 			  statement*
 			END WHILE
 		->	^(WHILE ^(COND expr) statement*)  
 		;
+fragment 
+  l_while	:	label ':' WHILE expr DO
+			  statement*
+			END WHILE label
+		->	^(WHILE ^(PROPS label) ^(COND expr) statement*)  
+  		;		
 		
-
-
 
 // Expression
 expr	:	dot_expr;
