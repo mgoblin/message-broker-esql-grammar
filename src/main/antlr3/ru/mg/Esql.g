@@ -30,7 +30,7 @@ statement	:	(var_decl | set_stat | if_stat | ret_stat | beginend_stat | while_st
 			 func_decl_stat | handler_stat | delete_from_stat | delete_stat | eval_stat |
 			 for_stat | insert_stat | iterate_stat | leave_stat | log_stat | loop_stat | 
 			 move_stat | pass_stat |  propagate_stat | module_stat | repeat_stat | 
-			 resignal_stat) ';'!
+			 resignal_stat | throw_stat) ';'!
 		;
 		
 /*
@@ -471,6 +471,7 @@ l_repeat	:	label ':'
 		;		  		
 // End of  REPEATE statement		  		 		
 
+// Resignal statement
 resignal_stat	:	RESIGNAL^
 		;  			
   					
@@ -485,8 +486,18 @@ ret_stat	:	RETURN^ expr? ;
 set_stat	:	SET eq_expr
 		->	^(SET eq_expr)
 		;
-// End of set statement		
-		
+// End of set statement	
+
+/*
+-------------------------------------------
+	THROW statement
+-------------------------------------------
+*/
+throw_stat	:	THROW USER? EXCEPTION (SEVERITY severity = expr)? (CATALOG catalog = expr)? (MESSAGE msg = expr)? 
+			(VALUES '(' expr (',' expr)* ')')?
+		->	^(THROW ^(PROPS USER? ^(SEVERITY $severity)? ^(CATALOG $catalog)? ^(MESSAGE $msg)? ) ^(VALUES expr+)?)	
+		;	
+// End THROW statement		
 
 // While statement
 while_stat	:	WHILE expr DO
