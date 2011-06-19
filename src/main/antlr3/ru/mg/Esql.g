@@ -30,7 +30,7 @@ statement	:	(var_decl | set_stat | if_stat | ret_stat | beginend_stat | while_st
 			 func_decl_stat | handler_stat | delete_from_stat | delete_stat | eval_stat |
 			 for_stat | insert_stat | iterate_stat | leave_stat | log_stat | loop_stat | 
 			 move_stat | pass_stat |  propagate_stat | module_stat | repeat_stat | 
-			 resignal_stat | throw_stat) ';'!
+			 resignal_stat | throw_stat | upd_stat) ';'!
 		;
 		
 /*
@@ -494,10 +494,29 @@ set_stat	:	SET eq_expr
 -------------------------------------------
 */
 throw_stat	:	THROW USER? EXCEPTION (SEVERITY severity = expr)? (CATALOG catalog = expr)? (MESSAGE msg = expr)? 
-			(VALUES '(' expr (',' expr)* ')')?
-		->	^(THROW ^(PROPS USER? ^(SEVERITY $severity)? ^(CATALOG $catalog)? ^(MESSAGE $msg)? ) ^(VALUES expr+)?)	
-		;	
-// End THROW statement		
+			throw_values?
+		->	^(THROW ^(PROPS USER? ^(SEVERITY $severity)? ^(CATALOG $catalog)? ^(MESSAGE $msg)? ) throw_values?)	
+		;
+fragment 
+  throw_values	:	VALUES '(' expr (',' expr)* ')'
+  		->	^(VALUES expr+)
+  		;			
+// End THROW statement
+/*
+-------------------------------------------
+	UPDATE statement
+-------------------------------------------
+*/
+upd_stat	:	UPDATE table_ref (AS alias=expr)?
+			  SET column_clause (',' column_clause)*
+			(WHERE where_expr=expr)?
+		->	^(UPDATE table_ref ^(AS $alias)? ^(SET column_clause+) ^(WHERE $where_expr)?)	
+		;
+fragment
+  column_clause	:	column_name '=' expr
+  		->	^(INIT column_name expr)
+  		;			
+// End of UPDATE statement				
 
 // While statement
 while_stat	:	WHILE expr DO
