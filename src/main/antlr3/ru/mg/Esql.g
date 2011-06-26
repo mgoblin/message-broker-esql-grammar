@@ -22,8 +22,8 @@ tokens {
 }
 // End AST node names
 
-module	:	var_decl+
-		module_stat;
+module	:	schema_stat	
+	;
 
 //Statement
 statement	:	(var_decl | set_stat | if_stat | ret_stat | beginend_stat | while_stat | 
@@ -31,7 +31,7 @@ statement	:	(var_decl | set_stat | if_stat | ret_stat | beginend_stat | while_st
 			 func_decl_stat | handler_stat | delete_from_stat | delete_stat | eval_stat |
 			 for_stat | insert_stat | iterate_stat | leave_stat | log_stat | loop_stat | 
 			 move_stat | pass_stat |  propagate_stat | module_stat | repeat_stat | 
-			 resignal_stat | throw_stat | upd_stat) ';'!
+			 resignal_stat | throw_stat | upd_stat ) ';'!
 		;
 		
 /*
@@ -47,6 +47,24 @@ fragment
   sibling	:	(FIRSTCHILD | LASTCHILD | PREVIOUSSIBLING | NEXTSIBLING);  
   
 // End of attach and detatch statements	
+
+/*
+-------------------------------------------
+	BROKER SCHEMA statement
+-------------------------------------------
+*/
+schema_stat	:	(BROKER SCHEMA schema_name)? (PATH schema_path)? esql_contents ';'!
+		;
+fragment
+  schema_name	:	ID ('.'^ ID)*
+  		;
+fragment
+  schema_path	:	schema_name (',' schema_name)* -> schema_name+	
+  		;
+fragment
+  esql_contents	:	((func_decl_stat | var_decl) ';'!)+
+  		;  		  				  		
+// End of BROKER SCHEMA statement
 
 /*
 -------------------------------------------
@@ -588,13 +606,14 @@ CONCAT_OP
 	
 // ESQL types
 type		:	T_BOOL | T_BOOLEAN | T_DATE | T_TIME | T_GMTTIME | T_TIMESTAMP | T_GMTTIMESTAMP | T_CHAR | T_CHARACTER 
-		| 	T_DEC | T_DECIMAL | T_FLOAT | T_INT | T_INTEGER  | T_ROW | T_BLOB | T_BIT | REFERENCE | T_REF
+		| 	T_DEC | T_DECIMAL | T_FLOAT | T_INT | T_INTEGER  | T_ROW | T_BLOB | T_BIT | REFERENCE | T_REF | REF
 		;
 // ESQL keywords
 AS	:	'AS';
 ATOMIC	:	'ATOMIC';
 ATTACH	:	'ATTACH';
 BEGIN 	:	'BEGIN';
+BROKER	:	'BROKER';
 CALL	:	'CALL';
 CASE	:	'CASE';
 CATALOG :	'CATALOG';
@@ -663,6 +682,7 @@ OUT	:	'OUT';
 PARENT	:	'PARENT';
 PARSE	:	'PARSE';
 PASSTHRU:	'PASSTHRU';
+PATH	:	'PATH';
 PREVIOUSSIBLING
 	:	'PREVIOUSSIBLING';
 PROCEDURE
@@ -670,7 +690,7 @@ PROCEDURE
 PROPAGATE
 	:	'PROPAGATE';
 REFERENCE
-	:	'REFERENCE TO';
+	:	'REFERENCE';
 REPEAT	:	'REPEAT';
 RESIGNAL:	'RESIGNAL';
 RETURNS	:	'RETURNS';
@@ -696,6 +716,7 @@ UPDATE	:	'UPDATE';
 USER	:	'USER';
 
 // ESQL data types
+REF	:	'REFERENCE TO';
 T_BIT	:	'BIT';
 T_BLOB	:	'BLOB';
 T_BOOL	:	'BOOL';	
