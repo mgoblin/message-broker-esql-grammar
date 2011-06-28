@@ -557,10 +557,12 @@ fragment
 // Expression
 expr	:	dot_expr;
 
-dot_expr:	logic_expr ('.'^ logic_expr)*;
+dot_expr:	between_expr ('.'^ between_expr)*;
+
+between_expr	
+	:	logic_expr (NOT? BETWEEN_OP^ (ASYMMETRIC | SYMMETRIC)? logic_expr)?;	
 	
-logic_expr	
-	:	eq_expr (BINARY_LOGICAL_OP^ eq_expr)*;
+logic_expr:	eq_expr (BINARY_LOGICAL_OP^ eq_expr)*;
 	
 eq_expr	:	sc_expr	(EQ_OP^ sc_expr)*;
 
@@ -578,8 +580,7 @@ mult_expr
 ulogic_expr	
 	:	NOT^? arr_expr;
 	
-arr_expr:	atom ('['^ atom? ']'!)*;	
-
+arr_expr:	atom ('['^ atom? ']'!)*;
 	
 atom	:	ID | MINUS_OP^? INT | STRING | BOOL | NULL | LITERAL | '('! expr ')'!;
 
@@ -590,7 +591,7 @@ SIMPLE_COMPARE_OP
 EQ_OP	:	'=';	
 
 // Complex comparison operators
-CC_OP 	:	'BETWEEN';
+BETWEEN_OP 	:	'BETWEEN';
 
 // Logical binary operators
 BINARY_LOGICAL_OP : 'AND' | 'OR';
@@ -610,6 +611,8 @@ type		:	T_BOOL | T_BOOLEAN | T_DATE | T_TIME | T_GMTTIME | T_TIMESTAMP | T_GMTTI
 		;
 // ESQL keywords
 AS	:	'AS';
+ASYMMETRIC
+	:	'ASYMMETRIC';
 ATOMIC	:	'ATOMIC';
 ATTACH	:	'ATTACH';
 BEGIN 	:	'BEGIN';
@@ -700,6 +703,8 @@ SET	:	'SET';
 SEVERITY:	'SEVERITY';
 SHARED	:	'SHARED';
 SQLSTATE:	'SQLSTATE';
+SYMMETRIC
+	:	'SYMMETRIC';
 TERMINAL:	'TERMINAL';
 THEN	:	'THEN';
 THROW	:	'THROW';
