@@ -551,16 +551,20 @@ fragment
 			  statement*
 			END WHILE label
 		->	^(WHILE ^(PROPS label) ^(COND expr) statement*)  
-  		;		
+  		;
+  		
+between_expr	
+	:	expr (NOT? BETWEEN_OP^ (ASYMMETRIC | SYMMETRIC)? expr)?;
+		
+exists_expr
+	:	EXISTS^? '('! expr ')'!;		
+  				
 		
 
 // Expression
 expr	:	dot_expr;
 
-dot_expr:	between_expr ('.'^ between_expr)*;
-
-between_expr	
-	:	logic_expr (NOT? BETWEEN_OP^ (ASYMMETRIC | SYMMETRIC)? logic_expr)?;	
+dot_expr:	logic_expr ('.'^ logic_expr)*;
 	
 logic_expr:	eq_expr (BINARY_LOGICAL_OP^ eq_expr)*;
 	
@@ -641,6 +645,7 @@ EVAL	:	'EVAL';
 EVENT	:	'EVENT';
 EXCEPTION
 	:	'EXCEPTION';
+EXISTS	:	'EXISTS';	
 EXIT	:	'EXIT';
 EXTERNAL:	'EXTERNAL';
 FOR	:	'FOR';

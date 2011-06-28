@@ -33,6 +33,9 @@ sc_expr:
 between_expr:
     "x BETWEEN 10 AND 20" -> (BETWEEN x (AND 10 20))
 
+exists_expr:
+    "EXISTS (1)" -> (EXISTS 1)
+
 concat_expr:
     "\"Hello\" || \", world\"" -> (|| "\"Hello\"" "\", world\"")
 
