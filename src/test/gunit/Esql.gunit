@@ -32,9 +32,14 @@ sc_expr:
 
 between_expr:
     "x BETWEEN 10 AND 20" -> (BETWEEN x (AND 10 20))
+    "x NOT BETWEEN 10 AND 20" -> (BETWEEN x NOT (AND 10 20))
 
 exists_expr:
     "EXISTS (1)" -> (EXISTS 1)
+
+in_expr:
+    "z IN 1, 2, 5" -> (IN z 1 2 5)
+    "z NOT IN 1, 2, 5" -> (IN z NOT 1 2 5)
 
 concat_expr:
     "\"Hello\" || \", world\"" -> (|| "\"Hello\"" "\", world\"")

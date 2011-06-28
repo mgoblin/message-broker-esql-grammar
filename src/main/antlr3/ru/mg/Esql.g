@@ -559,7 +559,7 @@ between_expr
 exists_expr
 	:	EXISTS^? '('! expr ')'!;		
   				
-		
+in_expr	:	expr NOT? IN^ expr (','! expr)*;		
 
 // Expression
 expr	:	dot_expr;
