@@ -552,9 +552,7 @@ fragment
 			END WHILE label
 		->	^(WHILE ^(PROPS label) ^(COND expr) statement*)  
   		;
-  		
-between_expr	
-	:	expr (NOT? BETWEEN_OP^ (ASYMMETRIC | SYMMETRIC)? expr)?;
+  	
 		
 exists_expr
 	:	EXISTS^? '('! expr ')'!;		
@@ -562,8 +560,11 @@ exists_expr
 in_expr	:	expr NOT? IN^ expr (','! expr)*;		
 
 // Expression
-expr	:	dot_expr;
+expr	:	between_expr;
 
+between_expr	
+	:	dot_expr (NOT? BETWEEN_OP^ (ASYMMETRIC | SYMMETRIC)? dot_expr)?;
+	
 dot_expr:	logic_expr ('.'^ logic_expr)*;
 	
 logic_expr:	eq_expr (BINARY_LOGICAL_OP^ eq_expr)*;

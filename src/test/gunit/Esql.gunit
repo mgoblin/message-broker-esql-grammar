@@ -33,6 +33,7 @@ sc_expr:
 between_expr:
     "x BETWEEN 10 AND 20" -> (BETWEEN x (AND 10 20))
     "x NOT BETWEEN 10 AND 20" -> (BETWEEN x NOT (AND 10 20))
+    "1 + 2 BETWEEN 1 * 1 AND 10-4"->(BETWEEN (+ 1 2) (AND (* 1 1) (- 10 4)))
 
 exists_expr:
     "EXISTS (1)" -> (EXISTS 1)
@@ -146,6 +147,13 @@ while_stat:
     END WHILE;
     >>
     ->   (WHILE (COND (= x TRUE)) (SET(= z (+ z 1))))
+
+    <<
+    WHILE x BETWEEN 0 AND 10 DO
+      SET z = z + 1;
+    END WHILE;
+    >>
+    -> (WHILE (COND (BETWEEN x (AND 0 10))) (SET (= z (+ z 1))))
 
 attach_stat:
     "ATTACH ref1 TO OutputRoot.XMLNSC.Data.Order[2] AS LASTCHILD" -> (ATTACH ref1 (. (. (. OutputRoot XMLNSC) Data) ([ Order 2)) LASTCHILD)
