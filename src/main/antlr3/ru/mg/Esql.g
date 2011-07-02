@@ -59,7 +59,7 @@ fragment
   schema_name	:	ID ('.'^ ID)*
   		;
 fragment
-  schema_path	:	schema_name (',' schema_name)* -> schema_name+	
+  schema_path	:	schema_name ('\,' schema_name)* -> schema_name+	
   		;
 fragment
   esql_contents	:	((func_decl_stat | var_decl) ';'!)+
@@ -103,8 +103,7 @@ fragment
   ext_sch	:	(EXTERNAL SCHEMA^ expr)
   		; 		 		
 fragment  		
-  params	:	expr (',' expr)* 
-  		-> 	expr+
+  params	:	expr
 		; 
 // End of call statement	
 
@@ -148,8 +147,8 @@ fragment
   from_clause	:	FROM expr
   		;
 fragment
-  parse_clause	:	PARSE '(' expr (',' expr)* ')'
-  		->	^(PARSE expr+)
+  parse_clause	:	PARSE '(' expr ')'
+  		->	^(PARSE expr)
   		;		
 fragment
   values_clause	:	REPEAT	| ident_clause | type_clause (VALUE expr)?
@@ -197,7 +196,7 @@ fragment
   func_type	:	FUNCTION | PROCEDURE
   		;
 fragment
-  params_decl	:	param_decl (',' param_decl)*
+  params_decl	:	param_decl ('\,' param_decl)*
 		->	(param_decl)*
 		;
 fragment
@@ -223,18 +222,18 @@ fragment
 var_decl	:	var_only_decl | const_decl| var_ns_decl | var_ctor_decl 
 		;
 		
-var_only_decl	:	DECLARE var_name (',' var_name)* var_modifier? type
+var_only_decl	:	DECLARE var_name ('\,' var_name)* var_modifier? type
 		->	^(VAR ^(var_name type var_modifier?))+
 		;
-const_decl	:	DECLARE var_name (',' var_name)* var_modifier? CONSTANT type expr
+const_decl	:	DECLARE var_name ('\,' var_name)* var_modifier? CONSTANT type expr
 		->	^(CONSTANT ^(var_name type var_modifier?))+ ^(INIT var_name expr)+	
 		;				
 
-var_ctor_decl	:	DECLARE var_name (',' var_name)* var_modifier? type expr
+var_ctor_decl	:	DECLARE var_name ('\,' var_name)* var_modifier? type expr
 		->	^(VAR ^(var_name type var_modifier?))+ ^(INIT var_name expr)+
 		;
 		
-var_ns_decl	:	DECLARE var_name (',' var_name)* var_modifier? (NAMESPACE | NAME) expr
+var_ns_decl	:	DECLARE var_name ('\,' var_name)* var_modifier? (NAMESPACE | NAME) expr
 		->	^(NS ^(var_name var_modifier?))+ ^(INIT var_name expr)+ 
 		;		
 		
@@ -258,7 +257,7 @@ fragment
   handler_type	:	CONTINUE | EXIT
   		;			
 fragment 
-  states	: 	state_item (',' state_item)* 
+  states	: 	state_item ('\,' state_item)* 
 		-> 	state_item+
 		;
 fragment 
@@ -351,8 +350,8 @@ fragment
 	Insert statement
 -------------------------------------------
 */			
-insert_stat	:	INSERT INTO table_ref '(' column_name (',' column_name)* ')' VALUES '(' value (',' value)* ')'
-		->	^(INSERT table_ref ^(PARAMS column_name+) ^(VALUES value+)) 
+insert_stat	:	INSERT INTO table_ref '(' column_name ('\,' column_name)* ')' VALUES value
+		->	^(INSERT table_ref ^(PARAMS column_name+) ^(VALUES value)) 
 		;
 fragment
   column_name	:	ID | LITERAL
@@ -377,8 +376,8 @@ leave_stat	:	LEAVE^ label
 	LOG statement
 -------------------------------------------
 */
-log_stat	:	LOG log_type log_kind? log_options (VALUES  '('value (',' value)* ')' )?
-		->	^(LOG ^(PROPS log_type log_options? log_kind?) ^(VALUES value+)?)
+log_stat	:	LOG log_type log_kind? log_options (VALUES  value )?
+		->	^(LOG ^(PROPS log_type log_options? log_kind?) ^(VALUES value)?)
 		;	
 fragment
   log_type	:	EVENT | (USER! TRACE)
@@ -436,8 +435,7 @@ fragment
   		->	expr ^(TO table_ref)? ^(VALUES values)?
   		;
 fragment
-  values	:	expr (',' expr)*  
-  		-> 	expr+
+  values	:	expr
   		;
 // End of PASSTHRU statement
 
@@ -517,8 +515,8 @@ throw_stat	:	THROW USER? EXCEPTION (SEVERITY severity = expr)? (CATALOG catalog 
 		->	^(THROW ^(PROPS USER? ^(SEVERITY $severity)? ^(CATALOG $catalog)? ^(MESSAGE $msg)? ) throw_values?)	
 		;
 fragment 
-  throw_values	:	VALUES '(' expr (',' expr)* ')'
-  		->	^(VALUES expr+)
+  throw_values	:	VALUES '(' expr  ')'
+  		->	^(VALUES expr)
   		;			
 // End THROW statement
 /*
@@ -527,7 +525,7 @@ fragment
 -------------------------------------------
 */
 upd_stat	:	UPDATE table_ref (AS alias=expr)?
-			  SET column_clause (',' column_clause)*
+			  SET column_clause+
 			(WHERE where_expr=expr)?
 		->	^(UPDATE table_ref ^(AS $alias)? ^(SET column_clause+) ^(WHERE $where_expr)?)	
 		;
@@ -552,18 +550,18 @@ fragment
 			END WHILE label
 		->	^(WHILE ^(PROPS label) ^(COND expr) statement*)  
   		;
-  	
-		
-in_expr	:	expr NOT? IN^ expr (','! expr)*;		
+  		
 
 // Expression
-expr	:	exists_expr;
+expr	:	in_expr;
+
+in_expr	:	exists_expr (NOT? IN^ lst_expr)*;
 
 exists_expr
 	:	EXISTS^? between_expr;	
 
 between_expr	
-	:	dot_expr (NOT? BETWEEN_OP^ (ASYMMETRIC | SYMMETRIC)? dot_expr)?;
+	:	dot_expr (NOT? BETWEEN_OP^ (ASYMMETRIC | SYMMETRIC)? dot_expr)*;
 	
 dot_expr:	logic_expr ('.'^ logic_expr)*;
 	
@@ -574,7 +572,9 @@ eq_expr	:	sc_expr	(EQ_OP^ sc_expr)*;
 sc_expr	:	concat_expr (SIMPLE_COMPARE_OP^ concat_expr)*;
 
 concat_expr	
-	:	add_expr (CONCAT_OP^ add_expr)*;
+	:	lst_expr (CONCAT_OP^ lst_expr)*;
+
+lst_expr:	add_expr ('\,' add_expr)* -> add_expr+;		
 
 add_expr
 	:	mult_expr ( (PLUS_OP^ | MINUS_OP^) mult_expr )*;
