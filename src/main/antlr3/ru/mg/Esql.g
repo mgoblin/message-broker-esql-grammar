@@ -54,7 +54,7 @@ fragment
 	BROKER SCHEMA statement
 -------------------------------------------
 */
-schema_stat	:	(BROKER SCHEMA schema_name)? (PATH schema_path)? esql_contents
+schema_stat	:	(BROKER SCHEMA schema_name)? (PATH schema_path ';'!)? esql_contents
 		;
 fragment
   schema_name	:	ID ('.'^ ID)*
@@ -501,8 +501,8 @@ ret_stat	:	RETURN^ expr? ;
 	SET statement
 -------------------------------------------
 */
-set_stat	:	SET eq_expr
-		->	^(SET eq_expr)
+set_stat	:	SET expr
+		->	^(SET expr)
 		;
 // End of set statement	
 
