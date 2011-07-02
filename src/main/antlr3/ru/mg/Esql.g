@@ -554,13 +554,13 @@ fragment
   		;
   	
 		
-exists_expr
-	:	EXISTS^? '('! expr ')'!;		
-  				
 in_expr	:	expr NOT? IN^ expr (','! expr)*;		
 
 // Expression
-expr	:	between_expr;
+expr	:	exists_expr;
+
+exists_expr
+	:	EXISTS^? between_expr;	
 
 between_expr	
 	:	dot_expr (NOT? BETWEEN_OP^ (ASYMMETRIC | SYMMETRIC)? dot_expr)?;
