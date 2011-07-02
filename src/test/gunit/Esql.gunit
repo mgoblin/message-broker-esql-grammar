@@ -42,6 +42,11 @@ in_expr:
     "z IN 1, 2, 5" -> (IN z 1 2 5)
     "z NOT IN 1, 2, 5" -> (IN z NOT 1 2 5)
 
+is_expr:
+    "A IS NULL" -> (IS A NULL)
+    "B IS NOT NULL" -> (IS B NOT NULL)
+    "1 + 1 IS NOT NULL" -> (IS (+ 1 1) NOT NULL)
+
 concat_expr:
     "\"Hello\" || \", world\"" -> (|| "\"Hello\"" "\", world\"")
 

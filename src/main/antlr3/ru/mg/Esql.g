@@ -550,10 +550,11 @@ fragment
 			END WHILE label
 		->	^(WHILE ^(PROPS label) ^(COND expr) statement*)  
   		;
-  		
 
 // Expression
-expr	:	in_expr;
+expr	:	is_expr;
+
+is_expr	:	in_expr (IS^ NOT? (BOOL | 'INF' | '+INF' | '-INF' | 'INFINITY' | '+INFINITY' | '-INFINITY' | 'NAN' | 'NULL' | 'NUM' | 'NUMBER' | 'UNKNOWN'))?;  		
 
 in_expr	:	exists_expr (NOT? IN^ lst_expr)*;
 
