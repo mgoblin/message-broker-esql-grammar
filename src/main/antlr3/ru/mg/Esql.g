@@ -54,7 +54,7 @@ fragment
 	BROKER SCHEMA statement
 -------------------------------------------
 */
-schema_stat	:	(BROKER SCHEMA schema_name)? (PATH schema_path)? esql_contents ';'!
+schema_stat	:	(BROKER SCHEMA schema_name)? (PATH schema_path)? esql_contents
 		;
 fragment
   schema_name	:	ID ('.'^ ID)*
@@ -63,7 +63,7 @@ fragment
   schema_path	:	schema_name ('\,' schema_name)* -> schema_name+	
   		;
 fragment
-  esql_contents	:	((func_decl_stat | var_decl) ';'!)+
+  esql_contents	:	((func_decl_stat | var_decl | module_stat) ';'!)+
   		;  		  				  		
 // End of BROKER SCHEMA statement
 
