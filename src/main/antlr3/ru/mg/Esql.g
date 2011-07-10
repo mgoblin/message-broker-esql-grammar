@@ -557,7 +557,7 @@ fragment
 
 /*
 -------------------------------------------
-	Database state functions
+	ESQL Database state functions
 -------------------------------------------
 */
 f_sql_code
@@ -575,7 +575,20 @@ f_sql_nerror
 f_sql_state
 	:	SQLSTATE
 	->	^(ESQL_FUNCTION_CALL SQLSTATE)
-	;		
+	;
+/*
+-------------------------------------------
+	ESQL datetime functions
+-------------------------------------------
+*/
+f_extract
+	:	EXTRACT	'(' extract_part FROM expr ')'
+	->	^(ESQL_FUNCTION_CALL ^(EXTRACT extract_part expr))
+	;
+fragment
+  extract_part
+  	:	YEAR		
+  	;				
  		
 
 // Expression
@@ -618,7 +631,8 @@ ulogic_expr
 	
 arr_expr:	atom ('['^ atom? ']'!)*;
 	
-atom	:	f_sql_code | f_sql_err_text| f_sql_nerror | f_sql_state |
+atom	:	f_sql_code | f_sql_err_text| f_sql_nerror | f_sql_state | 
+		f_extract |
 		ID | MINUS_OP^? INT | STRING | BOOL | NULL | LITERAL | '('! expr ')'!;
 
 
@@ -651,6 +665,10 @@ type		:	T_BOOL | T_BOOLEAN | T_DATE | T_TIME | T_GMTTIME | T_TIMESTAMP | T_GMTTI
 SQLCODE		:	'SQLCODE';
 SQLERRORTEXT	:	'SQLERRORTEXT';
 SQLNATIVEERROR	:	'SQLNATIVEERROR';
+EXTRACT		:	'EXTRACT';
+
+//DateTime parts
+YEAR		:	'YEAR';
 
 		
 // ESQL keywords
