@@ -188,8 +188,8 @@ module_name 	:	ID;
 -------------------------------------------------------propagate_stat
 */
 func_decl_stat	:	CREATE func_type func_name '(' params_decl? ')' (RETURNS type)? (LANGUAGE language)?
-			  statement?	 
-		-> ^(func_type ^(func_name ^(PARAMS params_decl)? ^(RETURNS type)? ^(LANGUAGE language)? ^(BODY statement)?))		
+			  (statement | external)?
+		-> ^(func_type ^(func_name ^(PARAMS params_decl)? ^(RETURNS type)? ^(LANGUAGE language)? ^(BODY statement)? ^(BODY external)? ))		
 		;
 fragment
   func_name	: 	ID
@@ -215,6 +215,10 @@ fragment
 fragment
   language	:	ESQL | DATABASE | JAVA
   		;	  		
+fragment
+  external	:	EXTERNAL NAME expr
+  		->	^(EXTERNAL expr)
+  		;    		
 
 /*
 ----------------------------------------------
