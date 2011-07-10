@@ -74,6 +74,11 @@ logic_expr:
 dot_expr:
     "OutputRoot.XMLNSC.Data.Order" -> (. (. (. OutputRoot XMLNSC) Data) Order)
 
+colon_expr:
+    "ru.sbrf:schemaLocation" -> (: (. ru sbrf) schemaLocation)
+    "InputRoot.XMLNSC.ns:event.ns:eventPointData.ns:eventData.ns:eventCorrelation.ns:localTransactionId"
+    -> (: (: (: (: (: (. (. InputRoot XMLNSC) ns) (. event ns)) (. eventPointData ns)) (. eventData ns)) (. eventCorrelation ns)) localTransactionId)
+
 arr_expr:
     "Order[2]" -> ([ Order 2)
     "Order[]" -> ([ Order)

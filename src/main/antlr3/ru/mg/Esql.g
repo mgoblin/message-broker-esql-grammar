@@ -563,7 +563,10 @@ exists_expr
 	:	EXISTS^? between_expr;	
 
 between_expr	
-	:	dot_expr (NOT? BETWEEN_OP^ (ASYMMETRIC | SYMMETRIC)? dot_expr)*;
+	:	colon_expr (NOT? BETWEEN_OP^ (ASYMMETRIC | SYMMETRIC)? colon_expr)*;
+
+colon_expr
+	:	dot_expr (':'^ dot_expr)*;
 	
 dot_expr:	logic_expr ('.'^ logic_expr)*;
 	
