@@ -571,7 +571,11 @@ f_sql_err_text
 f_sql_nerror
 	:	SQLNATIVEERROR
 	->	^(ESQL_FUNCTION_CALL SQLNATIVEERROR)
-	;	
+	;
+f_sql_state
+	:	SQLSTATE
+	->	^(ESQL_FUNCTION_CALL SQLSTATE)
+	;		
  		
 
 // Expression
@@ -614,7 +618,7 @@ ulogic_expr
 	
 arr_expr:	atom ('['^ atom? ']'!)*;
 	
-atom	:	f_sql_code | f_sql_err_text| f_sql_nerror |
+atom	:	f_sql_code | f_sql_err_text| f_sql_nerror | f_sql_state |
 		ID | MINUS_OP^? INT | STRING | BOOL | NULL | LITERAL | '('! expr ')'!;
 
 
