@@ -602,7 +602,11 @@ f_cur_time
 f_cur_timestamp
 	:	CURRENT_TIMESTAMP
 	->	^(ESQL_FUNCTION_CALL CURRENT_TIMESTAMP)
-	;		  	
+	;
+f_cur_gmt_date	
+	:	CURRENT_GMTDATE			  	
+	->	^(ESQL_FUNCTION_CALL CURRENT_GMTDATE)
+	;
 
 // Expression
 expr	:	is_expr;
@@ -645,7 +649,7 @@ ulogic_expr
 arr_expr:	atom ('['^ atom? ']'!)*;
 	
 atom	:	f_sql_code | f_sql_err_text| f_sql_nerror | f_sql_state | 
-		f_extract | f_cur_date | f_cur_time | f_cur_timestamp |
+		f_extract | f_cur_date | f_cur_time | f_cur_timestamp | f_cur_gmt_date | 
 		ID | MINUS_OP^? INT | STRING | BOOL | NULL | LITERAL | '('! expr ')'!;
 
 
@@ -683,6 +687,7 @@ CURRENT_DATE	:	'CURRENT_DATE';
 CURRENT_TIME	:	'CURRENT_TIME';
 CURRENT_TIMESTAMP
 	:		'CURRENT_TIMESTAMP';
+CURRENT_GMTDATE :	'CURRENT_GMTDATE';		
 
 //DateTime parts
 YEAR		:	'YEAR';
