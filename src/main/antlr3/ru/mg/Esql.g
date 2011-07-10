@@ -637,6 +637,10 @@ f_position
 	:	POSITION '(' src_expr=in_expr (FROM from_expr=expr)? (REPEAT repeat_expr=expr)? ')'
 	-> 	^(ESQL_FUNCTION_CALL ^(POSITION $src_expr ^(FROM $from_expr)? (REPEAT $repeat_expr)? ))
 	;
+f_substring
+	:	SUBSTRING '(' sexpr=expr FROM start=expr (FOR end=expr)? ')'
+	->	^(ESQL_FUNCTION_CALL SUBSTRING $start $end?)
+	;	
 	
 			
 
@@ -682,7 +686,7 @@ arr_expr:	atom ('['^ atom? ']'!)*;
 	
 atom	:	f_sql_code | f_sql_err_text| f_sql_nerror | f_sql_state | 
 		f_extract | f_cur_date | f_cur_time | f_cur_timestamp | f_cur_gmt_date | f_cur_gmt_time | f_cur_gmt_timestamp | f_loc_timezone |
-		f_num_round | f_overlay | f_position | 
+		f_num_round | f_overlay | f_position | f_substring | 
 		ID | MINUS_OP^? INT | STRING | BOOL | NULL | LITERAL | '('! expr ')'!;
 
 
@@ -728,6 +732,7 @@ LOCAL_TIMEZONE	:	'LOCAL_TIMEZONE';
 ROUND		:	'ROUND';
 OVERLAY		:	'OVERLAY';
 POSITION	:	'POSITION';
+SUBSTRING	:	'SUBSTRING';
 
 //DateTime parts
 YEAR		:	'YEAR';
