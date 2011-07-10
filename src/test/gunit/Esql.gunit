@@ -87,6 +87,7 @@ expr:
     "OutputRoot.XMLNS.Invoice.Purchases.Item[1];" -> (. (. (. (. OutputRoot XMLNS) Invoice) Purchases) ([ Item 1))
     "S.ACCOUNTNO = InputBody.AccountNumber" -> (. (. S (= ACCOUNTNO InputBody)) AccountNumber)
     "x + 1 IN (1, 3, 5, 40)"-> (IN (+ x 1) 1 3 5 40)
+    "SQLCode1 = SQLCODE" -> (= SQLCode1 (ESQL_FUNCTION_CALL SQLCODE))
 
 var_ns_decl:
     "DECLARE sp1 NAMESPACE 'http://esql.ru'" -> (NS sp1) (INIT sp1 'http://esql.ru')
@@ -309,3 +310,6 @@ upd_stat:
   -> (UPDATE (DATABASE StockPrices) (AS SP) (SET (INIT PRICE (. (. InputBody Message) StockPrice))))
   "UPDATE DATABASE.StockPrices AS SP SET PRICE = InputBody.Message.StockPrice WHERE SP.COMPANY = InputBody.Message.Company"
   -> (UPDATE (DATABASE StockPrices) (AS SP) (SET (INIT PRICE (. (. InputBody Message) StockPrice))) (WHERE (. (. (. SP (= COMPANY InputBody)) Message) Company)))
+
+statement:
+  "SET SQLCode1 = SQLCODE;" -> (SET (= SQLCode1 (ESQL_FUNCTION_CALL SQLCODE)))

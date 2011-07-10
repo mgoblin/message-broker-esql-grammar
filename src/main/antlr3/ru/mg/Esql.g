@@ -19,6 +19,7 @@ tokens {
 	ATOMICITY;	
 	PARAMS;		
 	BODY;
+	ESQL_FUNCTION_CALL;
 	
 }
 // End AST node names
@@ -32,7 +33,7 @@ statement	:	(var_decl | set_stat | if_stat | ret_stat | beginend_stat | while_st
 			 func_decl_stat | handler_stat | delete_from_stat | delete_stat | eval_stat |
 			 for_stat | insert_stat | iterate_stat | leave_stat | log_stat | loop_stat | 
 			 move_stat | pass_stat |  propagate_stat | module_stat | repeat_stat | 
-			 resignal_stat | throw_stat | upd_stat ) ';'!
+			 resignal_stat | throw_stat | upd_stat) ';'!
 		;
 		
 /*
@@ -551,6 +552,18 @@ fragment
 			END WHILE label
 		->	^(WHILE ^(PROPS label) ^(COND expr) statement*)  
   		;
+  		
+// ESQL Functions
+
+/*
+-------------------------------------------
+	Database state functions
+-------------------------------------------
+*/
+f_sql_code
+	:	 SQLCODE
+	->	^(ESQL_FUNCTION_CALL SQLCODE);
+ 		
 
 // Expression
 expr	:	is_expr;
@@ -592,7 +605,7 @@ ulogic_expr
 	
 arr_expr:	atom ('['^ atom? ']'!)*;
 	
-atom	:	ID | MINUS_OP^? INT | STRING | BOOL | NULL | LITERAL | '('! expr ')'!;
+atom	:	f_sql_code | ID | MINUS_OP^? INT | STRING | BOOL | NULL | LITERAL | '('! expr ')'!;
 
 
 // Simple comparison operators
@@ -619,6 +632,11 @@ CONCAT_OP
 type		:	T_BOOL | T_BOOLEAN | T_DATE | T_TIME | T_GMTTIME | T_TIMESTAMP | T_GMTTIMESTAMP | T_CHAR | T_CHARACTER 
 		| 	T_DEC | T_DECIMAL | T_FLOAT | T_INT | T_INTEGER  | T_ROW | T_BLOB | T_BIT | REFERENCE | T_REF | REF
 		;
+		
+//ESQL functions
+SQLCODE	:	'SQLCODE';
+
+		
 // ESQL keywords
 AS	:	'AS';
 ASYMMETRIC
