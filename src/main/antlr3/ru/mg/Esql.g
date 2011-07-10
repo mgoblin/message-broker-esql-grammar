@@ -598,7 +598,11 @@ f_cur_date
 f_cur_time
 	:	CURRENT_TIME
 	->	^(ESQL_FUNCTION_CALL CURRENT_TIME)
-	;	  	
+	;
+f_cur_timestamp
+	:	CURRENT_TIMESTAMP
+	->	^(ESQL_FUNCTION_CALL CURRENT_TIMESTAMP)
+	;		  	
 
 // Expression
 expr	:	is_expr;
@@ -641,7 +645,7 @@ ulogic_expr
 arr_expr:	atom ('['^ atom? ']'!)*;
 	
 atom	:	f_sql_code | f_sql_err_text| f_sql_nerror | f_sql_state | 
-		f_extract | f_cur_date | f_cur_time |
+		f_extract | f_cur_date | f_cur_time | f_cur_timestamp |
 		ID | MINUS_OP^? INT | STRING | BOOL | NULL | LITERAL | '('! expr ')'!;
 
 
@@ -677,6 +681,8 @@ SQLNATIVEERROR	:	'SQLNATIVEERROR';
 EXTRACT		:	'EXTRACT';
 CURRENT_DATE	:	'CURRENT_DATE';
 CURRENT_TIME	:	'CURRENT_TIME';
+CURRENT_TIMESTAMP
+	:		'CURRENT_TIMESTAMP';
 
 //DateTime parts
 YEAR		:	'YEAR';
