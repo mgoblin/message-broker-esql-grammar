@@ -628,7 +628,11 @@ fragment
   round_mode
   	:	'ROUND_UP' | 'ROUND_DOWN' | 'ROUND_CEILING' | 'ROUND_FLOOR' | 'ROUND_HALF_UP' | 'ROUND_HALF_EVEN' | 'ROUND_HALF_DOWN'
   	;		
-	
+
+f_overlay
+	:	OVERLAY '(' e1=LITERAL 'PLACING' e2=LITERAL FROM fexpr=expr (FOR forexpr=expr)? ')'
+	->	^(ESQL_FUNCTION_CALL ^(OVERLAY $e1 $e2 ^(PROPS $fexpr $forexpr?)))
+	;	
 
 // Expression
 expr	:	is_expr;
@@ -672,7 +676,7 @@ arr_expr:	atom ('['^ atom? ']'!)*;
 	
 atom	:	f_sql_code | f_sql_err_text| f_sql_nerror | f_sql_state | 
 		f_extract | f_cur_date | f_cur_time | f_cur_timestamp | f_cur_gmt_date | f_cur_gmt_time | f_cur_gmt_timestamp | f_loc_timezone |
-		f_num_round | 
+		f_num_round | f_overlay |
 		ID | MINUS_OP^? INT | STRING | BOOL | NULL | LITERAL | '('! expr ')'!;
 
 
@@ -716,6 +720,7 @@ CURRENT_GMTTIMESTAMP
 	:		'CURRENT_GMTTIMESTAMP';
 LOCAL_TIMEZONE	:	'LOCAL_TIMEZONE';
 ROUND		:	'ROUND';
+OVERLAY		:	'OVERLAY';
 
 //DateTime parts
 YEAR		:	'YEAR';
