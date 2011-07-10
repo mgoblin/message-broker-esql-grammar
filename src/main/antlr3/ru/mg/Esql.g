@@ -581,19 +581,22 @@ f_sql_state
 	ESQL datetime functions
 -------------------------------------------
 */
+f_extract
+	:	EXTRACT	'(' extract_part FROM expr ')'
+	->	^(ESQL_FUNCTION_CALL ^(EXTRACT extract_part expr))
+	;
 
 fragment
   extract_part
   	:	YEAR | MONTH | DAY | HOUR | MINUTE | SECOND | DAYS | DAYOFYEAR | DAYOFWEEK | MONTHS | 
   		QUARTEROFYEAR | QUARTERS | WEEKS | WEEKOFYEAR | WEEKOFMONTH | ISLEAPYEAR
-  	;				
- 		
+  	;	
+f_cur_date	
+	:	CURRENT_DATE
+	->	^(ESQL_FUNCTION_CALL CURRENT_DATE)
+	;  	
 
 // Expression
-f_extract
-	:	EXTRACT	'(' extract_part FROM expr ')'
-	->	^(ESQL_FUNCTION_CALL ^(EXTRACT extract_part expr))
-	;
 expr	:	is_expr;
 
 is_expr	:	in_expr (IS^ NOT? (BOOL | 'INF' | '+INF' | '-INF' | 'INFINITY' | '+INFINITY' | '-INFINITY' | 'NAN' | 'NULL' | 'NUM' | 'NUMBER' | 'UNKNOWN'))?;  		
@@ -634,7 +637,7 @@ ulogic_expr
 arr_expr:	atom ('['^ atom? ']'!)*;
 	
 atom	:	f_sql_code | f_sql_err_text| f_sql_nerror | f_sql_state | 
-		f_extract |
+		f_extract | f_cur_date | 
 		ID | MINUS_OP^? INT | STRING | BOOL | NULL | LITERAL | '('! expr ')'!;
 
 
@@ -668,6 +671,7 @@ SQLCODE		:	'SQLCODE';
 SQLERRORTEXT	:	'SQLERRORTEXT';
 SQLNATIVEERROR	:	'SQLNATIVEERROR';
 EXTRACT		:	'EXTRACT';
+CURRENT_DATE	:	'CURRENT_DATE';
 
 //DateTime parts
 YEAR		:	'YEAR';
