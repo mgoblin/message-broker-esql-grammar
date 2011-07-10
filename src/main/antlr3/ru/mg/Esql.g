@@ -568,6 +568,10 @@ f_sql_err_text
 	:	SQLERRORTEXT
 	->	^(ESQL_FUNCTION_CALL SQLERRORTEXT)
 	;	
+f_sql_nerror
+	:	SQLNATIVEERROR
+	->	^(ESQL_FUNCTION_CALL SQLNATIVEERROR)
+	;	
  		
 
 // Expression
@@ -610,7 +614,7 @@ ulogic_expr
 	
 arr_expr:	atom ('['^ atom? ']'!)*;
 	
-atom	:	f_sql_code | f_sql_err_text| 
+atom	:	f_sql_code | f_sql_err_text| f_sql_nerror |
 		ID | MINUS_OP^? INT | STRING | BOOL | NULL | LITERAL | '('! expr ')'!;
 
 
@@ -642,6 +646,7 @@ type		:	T_BOOL | T_BOOLEAN | T_DATE | T_TIME | T_GMTTIME | T_TIMESTAMP | T_GMTTI
 //ESQL functions
 SQLCODE		:	'SQLCODE';
 SQLERRORTEXT	:	'SQLERRORTEXT';
+SQLNATIVEERROR	:	'SQLNATIVEERROR';
 
 		
 // ESQL keywords

@@ -89,6 +89,7 @@ expr:
     "x + 1 IN (1, 3, 5, 40)"-> (IN (+ x 1) 1 3 5 40)
     "SQLCode1 = SQLCODE" -> (= SQLCode1 (ESQL_FUNCTION_CALL SQLCODE))
     "SQLErrorText1 = SQLERRORTEXT" -> (= SQLErrorText1 (ESQL_FUNCTION_CALL SQLERRORTEXT))
+    "SQLNativeError1 = SQLNATIVEERROR" -> (= SQLNativeError1 (ESQL_FUNCTION_CALL SQLNATIVEERROR))
 
 var_ns_decl:
     "DECLARE sp1 NAMESPACE 'http://esql.ru'" -> (NS sp1) (INIT sp1 'http://esql.ru')
@@ -315,3 +316,4 @@ upd_stat:
 statement:
   "SET SQLCode1 = SQLCODE;" -> (SET (= SQLCode1 (ESQL_FUNCTION_CALL SQLCODE)))
   "SET SQLErrorText1 = SQLERRORTEXT;" -> (SET (= SQLErrorText1 (ESQL_FUNCTION_CALL SQLERRORTEXT)))
+  "SET SQLNativeError1 = SQLNATIVEERROR;" -> (SET (= SQLNativeError1 (ESQL_FUNCTION_CALL SQLNATIVEERROR)))
