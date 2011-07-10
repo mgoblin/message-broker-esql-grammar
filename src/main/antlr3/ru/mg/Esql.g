@@ -594,7 +594,11 @@ fragment
 f_cur_date	
 	:	CURRENT_DATE
 	->	^(ESQL_FUNCTION_CALL CURRENT_DATE)
-	;  	
+	;
+f_cur_time
+	:	CURRENT_TIME
+	->	^(ESQL_FUNCTION_CALL CURRENT_TIME)
+	;	  	
 
 // Expression
 expr	:	is_expr;
@@ -637,7 +641,7 @@ ulogic_expr
 arr_expr:	atom ('['^ atom? ']'!)*;
 	
 atom	:	f_sql_code | f_sql_err_text| f_sql_nerror | f_sql_state | 
-		f_extract | f_cur_date | 
+		f_extract | f_cur_date | f_cur_time |
 		ID | MINUS_OP^? INT | STRING | BOOL | NULL | LITERAL | '('! expr ')'!;
 
 
@@ -672,6 +676,7 @@ SQLERRORTEXT	:	'SQLERRORTEXT';
 SQLNATIVEERROR	:	'SQLNATIVEERROR';
 EXTRACT		:	'EXTRACT';
 CURRENT_DATE	:	'CURRENT_DATE';
+CURRENT_TIME	:	'CURRENT_TIME';
 
 //DateTime parts
 YEAR		:	'YEAR';
