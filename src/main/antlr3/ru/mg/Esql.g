@@ -562,7 +562,12 @@ fragment
 */
 f_sql_code
 	:	 SQLCODE
-	->	^(ESQL_FUNCTION_CALL SQLCODE);
+	->	^(ESQL_FUNCTION_CALL SQLCODE)
+	;
+f_sql_err_text	
+	:	SQLERRORTEXT
+	->	^(ESQL_FUNCTION_CALL SQLERRORTEXT)
+	;	
  		
 
 // Expression
@@ -605,7 +610,8 @@ ulogic_expr
 	
 arr_expr:	atom ('['^ atom? ']'!)*;
 	
-atom	:	f_sql_code | ID | MINUS_OP^? INT | STRING | BOOL | NULL | LITERAL | '('! expr ')'!;
+atom	:	f_sql_code | f_sql_err_text| 
+		ID | MINUS_OP^? INT | STRING | BOOL | NULL | LITERAL | '('! expr ')'!;
 
 
 // Simple comparison operators
@@ -634,7 +640,8 @@ type		:	T_BOOL | T_BOOLEAN | T_DATE | T_TIME | T_GMTTIME | T_TIMESTAMP | T_GMTTI
 		;
 		
 //ESQL functions
-SQLCODE	:	'SQLCODE';
+SQLCODE		:	'SQLCODE';
+SQLERRORTEXT	:	'SQLERRORTEXT';
 
 		
 // ESQL keywords
