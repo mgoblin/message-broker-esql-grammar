@@ -620,6 +620,15 @@ f_loc_timezone
 	->	^(ESQL_FUNCTION_CALL LOCAL_TIMEZONE)
 	;
 	
+f_num_round
+	:	ROUND '(' lst_expr (MODE round_mode)?')'
+	->	^(ESQL_FUNCTION_CALL ^(ROUND lst_expr ^(PROPS round_mode)? ))
+	;
+fragment
+  round_mode
+  	:	'ROUND_UP' | 'ROUND_DOWN' | 'ROUND_CEILING' | 'ROUND_FLOOR' | 'ROUND_HALF_UP' | 'ROUND_HALF_EVEN' | 'ROUND_HALF_DOWN'
+  	;		
+	
 
 // Expression
 expr	:	is_expr;
@@ -663,6 +672,7 @@ arr_expr:	atom ('['^ atom? ']'!)*;
 	
 atom	:	f_sql_code | f_sql_err_text| f_sql_nerror | f_sql_state | 
 		f_extract | f_cur_date | f_cur_time | f_cur_timestamp | f_cur_gmt_date | f_cur_gmt_time | f_cur_gmt_timestamp | f_loc_timezone |
+		f_num_round | 
 		ID | MINUS_OP^? INT | STRING | BOOL | NULL | LITERAL | '('! expr ')'!;
 
 
@@ -704,7 +714,8 @@ CURRENT_GMTDATE :	'CURRENT_GMTDATE';
 CURRENT_GMTTIME	:	'CURRENT_GMTTIME';
 CURRENT_GMTTIMESTAMP
 	:		'CURRENT_GMTTIMESTAMP';
-LOCAL_TIMEZONE	:	'LOCAL_TIMEZONE';	
+LOCAL_TIMEZONE	:	'LOCAL_TIMEZONE';
+ROUND		:	'ROUND';
 
 //DateTime parts
 YEAR		:	'YEAR';
@@ -724,6 +735,8 @@ WEEKOFYEAR	:	'WEEKOFYEAR';
 WEEKOFMONTH	:	'WEEKOFMONTH';
 ISLEAPYEAR	:	'ISLEAPYEAR';
 
+// Round modes
+MODE		:	'MODE';
 		
 // ESQL keywords
 AS	:	'AS';
