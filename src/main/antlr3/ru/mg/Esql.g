@@ -3,6 +3,7 @@ grammar Esql;
 options {
   language = Java;
   output = AST;
+  backtrack=true;
 }
 
 /*
@@ -41,7 +42,7 @@ statement	:	(var_decl | set_stat | if_stat | ret_stat | beginend_stat | while_st
 	attach statement
 -------------------------------------------
 */
-attach_stat	: 	ATTACH dynamic_ref = expr TO field_ref = expr
+attach_stat	: 	ATTACH dynamic_ref = expression TO field_ref = expression
 			AS sibling
 		->	^(ATTACH $dynamic_ref $field_ref sibling)	
 		;
@@ -58,7 +59,7 @@ fragment
 schema_stat	:	(BROKER SCHEMA schema_name)? (PATH schema_path ';'!)? esql_contents
 		;
 fragment
-  schema_name	:	ID ('.'^ ID)*
+  schema_name	:	 expression
   		;
 fragment
   schema_path	:	schema_name ('\,' schema_name)* -> schema_name+	
@@ -81,7 +82,7 @@ beginend_stat	:	(label ':')? BEGIN (NOT? ATOMIC)?
 			  statement*)
 		;
 fragment
-  label		:	ID;
+  label		:	IDENTIFIER;
 // End begin ... end statement
 		
 /*
@@ -89,23 +90,23 @@ fragment
 	call statement
 -------------------------------------------
 */
-call_stat	: 	CALL dot_expr '(' params? ')' qualifiers? (INTO expr)?
-		->	^(CALL dot_expr ^(PARAMS params)? ^(INTO expr)? qualifiers?)
+call_stat	: 	CALL expression '(' params? ')' qualifiers? (INTO expression)?
+		->	^(CALL expression ^(PARAMS params)? ^(INTO expression)? qualifiers?)
 		;			
 fragment
-  routine_name	: 	ID
+  routine_name	: 	IDENTIFIER
   		;
 fragment  		
   qualifiers	:	in_sch | ext_sch
 		;  
 fragment
-  in_sch	:	(IN^ expr)
+  in_sch	:	(IN^ expression)
   		;
 fragment
-  ext_sch	:	(EXTERNAL SCHEMA^ expr)
+  ext_sch	:	(EXTERNAL SCHEMA^ expression)
   		; 		 		
 fragment  		
-  params	:	expr
+  params	:	expression ('\,'! expression)*
 		; 
 // End of call statement	
 
@@ -114,14 +115,14 @@ fragment
 	case statement
 -------------------------------------------
 */
-case_stat	:	CASE (case_expr = expr)?
+case_stat	:	CASE (case_expr = expression)?
 			  (WHEN wexpr THEN then_sts)*
 			  (ELSE elsestatement+)?
 			END CASE  
 		->	^(CASE ^(COND $case_expr)? ^(WHEN wexpr then_sts)* ^(ELSE elsestatement*)?)
 		;
 fragment
-  wexpr		:	expr
+  wexpr		:	expression
   		;
 fragment
   then_sts	:	statement+;  
@@ -134,9 +135,9 @@ fragment
 -------------------------------------------
 */
 create_stat	:	CREATE qualifier 
-			trg = expr 
-			(AS alias = expr)? 
-			(DOMAIN dexpr = expr)? props_clause
+			trg = expression 
+			(AS alias = expression)? 
+			(DOMAIN dexpr = expression)? props_clause
 		->	^(CREATE qualifier $trg ^(AS $alias)? ^(DOMAIN $dexpr)? ^(PROPS props_clause)?)	
 		;
 fragment
@@ -146,20 +147,20 @@ fragment
   qualifier	:	FIELD | ((PREVIOUSSIBLING | NEXTSIBLING | FIRSTCHILD | LASTCHILD) OF!)
 		;
 fragment
-  from_clause	:	FROM expr
+  from_clause	:	FROM expression
   		;
 fragment
-  parse_clause	:	PARSE '(' expr ')'
-  		->	^(PARSE expr)
+  parse_clause	:	PARSE '(' params? ')'
+  		->	^(PARSE params?)
   		;		
 fragment
-  values_clause	:	REPEAT	| ident_clause | type_clause (VALUE expr)?
+  values_clause	:	REPEAT	| ident_clause | type_clause (VALUE expression)?
   		;
 fragment
-  ident_clause	:	IDENTITY^ dot_expr 
+  ident_clause	:	IDENTITY^ expression 
   		;
 fragment
-  type_clause	:	(TYPE expr)? (NAMESPACE expr)? (NAME expr)?
+  type_clause	:	(TYPE expression)? (NAMESPACE expression | '*')? (NAME expression)?
   		;  		  		  		    		  		  		  		
   				
 // End of create statement
@@ -178,7 +179,7 @@ module_stat	:	CREATE module_type MODULE module_name
 		
 module_type	:	'COMPUTE' | 'DATABASE' | 'FILTER';
 	
-module_name 	:	ID;
+module_name 	:	IDENTIFIER;
 
 // End module declarationrepeat_stat
 
@@ -192,7 +193,7 @@ func_decl_stat	:	CREATE func_type func_name '(' params_decl? ')' (RETURNS type)?
 		-> ^(func_type ^(func_name ^(PARAMS params_decl)? ^(RETURNS type)? ^(LANGUAGE language)? ^(BODY statement)? ^(BODY external)? ))		
 		;
 fragment
-  func_name	: 	ID
+  func_name	: 	IDENTIFIER
   		;
 fragment
   func_type	:	FUNCTION | PROCEDURE
@@ -210,14 +211,14 @@ fragment
   		:	IN | OUT | INOUT
   		;
 fragment
-  param_name	:	ID
+  param_name	:	IDENTIFIER
   		;
 fragment
   language	:	ESQL | DATABASE | JAVA
   		;	  		
 fragment
-  external	:	EXTERNAL NAME expr
-  		->	^(EXTERNAL expr)
+  external	:	EXTERNAL NAME expression
+  		->	^(EXTERNAL expression)
   		;    		
 
 /*
@@ -231,23 +232,23 @@ var_decl	:	var_only_decl | const_decl| var_ns_decl | var_ctor_decl
 var_only_decl	:	DECLARE var_name ('\,' var_name)* var_modifier? type
 		->	^(VAR ^(var_name type var_modifier?))+
 		;
-const_decl	:	DECLARE var_name ('\,' var_name)* var_modifier? CONSTANT type expr
-		->	^(CONSTANT ^(var_name type var_modifier?))+ ^(INIT var_name expr)+	
+const_decl	:	DECLARE var_name ('\,' var_name)* var_modifier? CONSTANT type expression
+		->	^(CONSTANT ^(var_name type var_modifier?))+ ^(INIT var_name expression)+	
 		;				
 
-var_ctor_decl	:	DECLARE var_name ('\,' var_name)* var_modifier? type expr
-		->	^(VAR ^(var_name type var_modifier?))+ ^(INIT var_name expr)+
+var_ctor_decl	:	DECLARE var_name ('\,' var_name)* var_modifier? type expression
+		->	^(VAR ^(var_name type var_modifier?))+ ^(INIT var_name expression)+
 		;
 		
-var_ns_decl	:	DECLARE var_name ('\,' var_name)* var_modifier? (NAMESPACE | NAME) expr
-		->	^(NS ^(var_name var_modifier?))+ ^(INIT var_name expr)+ 
+var_ns_decl	:	DECLARE var_name ('\,' var_name)* var_modifier? (NAMESPACE | NAME) expression
+		->	^(NS ^(var_name var_modifier?))+ ^(INIT var_name expression)+ 
 		;		
 		
 fragment 
   var_modifier	:	SHARED | EXTERNAL
 		;						
 fragment
-  var_name	: 	ID | LITERAL
+  var_name	: 	IDENTIFIER
 		;
 // End of variable declarations	
 
@@ -267,7 +268,7 @@ fragment
 		-> 	state_item+
 		;
 fragment 
-  state_item	:	SQLSTATE^ (VALUE^ | LIKE^)? LITERAL (ESCAPE^ LITERAL)?
+  state_item	:	SQLSTATE^ (VALUE^ | LIKE^)? QUOTEDSTRING (ESCAPE^ QUOTEDSTRING)?
   		;  		  			
 			
 // End of DECLARE HANDLER statement
@@ -277,8 +278,8 @@ fragment
 	DELETE FROM statement
 -------------------------------------------
 */
-delete_from_stat:	DELETE FROM table_ref (AS ID)? where_clause?
-		->	^(DELETE table_ref ^(AS ID)? where_clause?)
+delete_from_stat:	DELETE FROM table_ref (AS IDENTIFIER)? where_clause?
+		->	^(DELETE table_ref ^(AS IDENTIFIER)? where_clause?)
 		;
 fragment
   table_ref	:	DATABASE ('.' data_source_clause)+
@@ -286,10 +287,10 @@ fragment
   		;
 fragment
   data_source_clause
-  		:	ID | ('{'! expr '}'!)
+  		:	IDENTIFIER | ('{'! expression '}'!)
   		;
 fragment
-  where_clause	:	WHERE^ expr
+  where_clause	:	WHERE^ expression
   		;  		 		  				 
 // End of delete from statement
 
@@ -298,21 +299,21 @@ fragment
 	DELETE statement
 -------------------------------------------
 */
-delete_stat	:	DELETE^ qualifier expr
+delete_stat	:	DELETE^ qualifier expression
 		;
 /*
 -------------------------------------------
 	DETACH statement
 -------------------------------------------
 */		
-detach_stat	:	DETACH^ expr;
+detach_stat	:	DETACH^ expression;
 
 /*
 -------------------------------------------
 	DETACH statement
 -------------------------------------------
 */		
-eval_stat	:	EVAL^ '('! expr ')'!
+eval_stat	:	EVAL^ '('! expression ')'!
 		;
 		
 /*
@@ -320,10 +321,10 @@ eval_stat	:	EVAL^ '('! expr ')'!
 	For statement
 -------------------------------------------
 */
-for_stat	:	FOR expr AS alias = expr DO
+for_stat	:	FOR expression AS alias = expression DO
 			  statement+
 			END FOR
-		->	^(FOR expr ^(AS $alias) statement+)
+		->	^(FOR expression ^(AS $alias) statement+)
 		;							
 		
 /*
@@ -342,9 +343,9 @@ if_stat		:	IF ifexpr THEN
 		->	^(IF ^(COND ifexpr statement*) ^(COND elifexpr elifstatement*)* ^(ELSE elsestatement*)?)				 
 		;
 fragment
-  ifexpr	:	expr;
+  ifexpr	:	expression;
 fragment 
-  elifexpr	:	expr;
+  elifexpr	:	expression;
 fragment
   elifstatement	:	statement;
 fragment
@@ -360,10 +361,10 @@ insert_stat	:	INSERT INTO table_ref '(' column_name ('\,' column_name)* ')' VALU
 		->	^(INSERT table_ref ^(PARAMS column_name+) ^(VALUES value)) 
 		;
 fragment
-  column_name	:	ID | LITERAL
+  column_name	:	IDENTIFIER
   		;
 fragment
-  value		:	expr
+  value		:	'('! params ')'!
   		;	  		
 // End of insert statement
 
@@ -392,11 +393,11 @@ fragment
   log_kind	:	FULL? EXCEPTION -> ^(EXCEPTION FULL?)
   		;  		
 fragment
-  log_options	:	(SEVERITY expr)? (CATALOG expr)? (MESSAGE expr)?
+  log_options	:	(SEVERITY expression)? (CATALOG expression)? (MESSAGE expression)?
   		; 
 // End of LOG statement
 
-/*
+/*ID
 -------------------------------------------
 	LOOP statement
 -------------------------------------------
@@ -422,10 +423,10 @@ fragment
 	MOVE statement
 -------------------------------------------
 */
-move_stat	:	MOVE^ trg = expr to_clause
+move_stat	:	MOVE^ trg=expression to_clause
 		;
 fragment
-  to_clause	:	(TO^ expr) | PARENT^ | (sibling^ (type_clause | ident_clause | REPEAT^ TYPE? NAME?))
+  to_clause	:	(TO^ expression) | PARENT^ | (sibling^ (type_clause | ident_clause | REPEAT^ TYPE? NAME?))
   		;
 // End of MOVE statement
 
@@ -437,11 +438,11 @@ fragment
 pass_stat	:	PASSTHRU^  db_clause | ('('! values ')'!)
 		;
 fragment
-  db_clause	:	expr (TO table_ref)? (VALUES values)?
-  		->	expr ^(TO table_ref)? ^(VALUES values)?
+  db_clause	:	expression (TO table_ref)? (VALUES values)?
+  		->	expression ^(TO table_ref)? ^(VALUES values)?
   		;
 fragment
-  values	:	expr
+  values	:	expression
   		;
 // End of PASSTHRU statement
 
@@ -454,11 +455,11 @@ propagate_stat	:	PROPAGATE (propagate_to msg_src)?
 		->	^(PROPAGATE propagate_to? msg_src?)
 		;
 fragment
-  propagate_to	:	TO (TERMINAL term= expr) | (LABEL lbl = expr)
+  propagate_to	:	TO (TERMINAL term= expression) | (LABEL lbl = expression)
   		->	^(TO (TERMINAL $term)? (LABEL $lbl)? )
   		;
 fragment
-  msg_src	:	(ENVIRONMENT^ expr)? (MESSAGE^ expr)? (EXCEPTION^ expr)? (FINALIZE | DELETE (DEFAULT | NONE)?)?
+  msg_src	:	(ENVIRONMENT^ expression)? (MESSAGE^ expression)? (EXCEPTION^ expression)? (FINALIZE | DELETE (DEFAULT | NONE)?)?
   		;
 fragment
   controls	:	fin | del
@@ -480,17 +481,17 @@ repeat_stat	:	s_repeat | l_repeat
 		
 s_repeat	:	REPEAT
 			  statement*
-			UNTIL expr
+			UNTIL expression
 			END REPEAT
-		->	^(REPEAT expr statement*)	
+		->	^(REPEAT expression statement*)	
 		;
 		
 l_repeat	:	label ':' 
 			REPEAT
 			  statement*
-			UNTIL expr
+			UNTIL expression
 			END REPEAT label
-		-> 	^(REPEAT ^(PROPS label) expr statement*)
+		-> 	^(REPEAT ^(PROPS label) expression statement*)
 		;		  		
 // End of  REPEATE statement		  		 		
 
@@ -499,15 +500,15 @@ resignal_stat	:	RESIGNAL^
 		;  			
   					
 // return statement
-ret_stat	:	RETURN^ expr? ;	
+ret_stat	:	RETURN^ expression? ;	
 
 /*
 -------------------------------------------
 	SET statement
 -------------------------------------------
 */
-set_stat	:	SET expr
-		->	^(SET expr)
+set_stat	:	SET expression
+		->	^(SET expression)
 		;
 // End of set statement	
 
@@ -516,13 +517,13 @@ set_stat	:	SET expr
 	THROW statement
 -------------------------------------------
 */
-throw_stat	:	THROW USER? EXCEPTION (SEVERITY severity = expr)? (CATALOG catalog = expr)? (MESSAGE msg = expr)? 
+throw_stat	:	THROW USER? EXCEPTION (SEVERITY severity = expression)? (CATALOG catalog = expression)? (MESSAGE msg = expression)? 
 			throw_values?
 		->	^(THROW ^(PROPS USER? ^(SEVERITY $severity)? ^(CATALOG $catalog)? ^(MESSAGE $msg)? ) throw_values?)	
 		;
 fragment 
-  throw_values	:	VALUES '(' expr  ')'
-  		->	^(VALUES expr)
+  throw_values	:	VALUES '(' params  ')'
+  		->	^(VALUES params)
   		;			
 // End THROW statement
 /*
@@ -530,14 +531,14 @@ fragment
 	UPDATE statement
 -------------------------------------------
 */
-upd_stat	:	UPDATE table_ref (AS alias=expr)?
+upd_stat	:	UPDATE table_ref (AS alias=expression)?
 			  SET column_clause+
-			(WHERE where_expr=expr)?
+			(WHERE where_expr=expression)?
 		->	^(UPDATE table_ref ^(AS $alias)? ^(SET column_clause+) ^(WHERE $where_expr)?)	
 		;
 fragment
-  column_clause	:	column_name '=' expr
-  		->	^(INIT column_name expr)
+  column_clause	:	column_name '=' expression
+  		->	^(INIT column_name expression)
   		;			
 // End of UPDATE statement				
 
@@ -545,16 +546,16 @@ fragment
 while_stat	:	s_while | l_while
 		;
 fragment
-  s_while	:	WHILE expr DO
+  s_while	:	WHILE expression DO
 			  statement*
 			END WHILE
-		->	^(WHILE ^(COND expr) statement*)  
+		->	^(WHILE ^(COND expression) statement*)  
 		;
 fragment 
-  l_while	:	label ':' WHILE expr DO
+  l_while	:	label ':' WHILE expression DO
 			  statement*
 			END WHILE label
-		->	^(WHILE ^(PROPS label) ^(COND expr) statement*)  
+		->	^(WHILE ^(PROPS label) ^(COND expression) statement*)  
   		;
   		
 // ESQL Functions
@@ -586,8 +587,8 @@ f_sql_state
 -------------------------------------------
 */
 f_extract
-	:	EXTRACT	'(' extract_part FROM expr ')'
-	->	^(ESQL_FUNCTION_CALL ^(EXTRACT extract_part expr))
+	:	EXTRACT	'(' extract_part FROM expression ')'
+	->	^(ESQL_FUNCTION_CALL ^(EXTRACT extract_part expression))
 	;
 
 fragment
@@ -623,76 +624,86 @@ f_loc_timezone
 	:	LOCAL_TIMEZONE	
 	->	^(ESQL_FUNCTION_CALL LOCAL_TIMEZONE)
 	;
-	
-f_num_round
-	:	ROUND '(' lst_expr (MODE round_mode)?')'
-	->	^(ESQL_FUNCTION_CALL ^(ROUND lst_expr ^(PROPS round_mode)? ))
-	;
-fragment
-  round_mode
-  	:	'ROUND_UP' | 'ROUND_DOWN' | 'ROUND_CEILING' | 'ROUND_FLOOR' | 'ROUND_HALF_UP' | 'ROUND_HALF_EVEN' | 'ROUND_HALF_DOWN'
-  	;		
-
 f_overlay
-	:	OVERLAY '(' e1=LITERAL 'PLACING' e2=LITERAL FROM fexpr=expr (FOR forexpr=expr)? ')'
+	:	OVERLAY '(' e1=QUOTEDSTRING 'PLACING' e2=QUOTEDSTRING FROM fexpr=expression (FOR forexpr=expression)? ')'
 	->	^(ESQL_FUNCTION_CALL ^(OVERLAY $e1 $e2 ^(PROPS $fexpr $forexpr?)))
 	;
 f_position
-	:	POSITION '(' src_expr=in_expr (FROM from_expr=expr)? (REPEAT repeat_expr=expr)? ')'
-	-> 	^(ESQL_FUNCTION_CALL ^(POSITION $src_expr ^(FROM $from_expr)? (REPEAT $repeat_expr)? ))
+	:	POSITION '(' search_expr=expression IN src_expr=colon_expr (FROM from_expr=expression)? (REPEAT repeat_expr=expression)? ')'
+	-> 	^(ESQL_FUNCTION_CALL ^(POSITION $search_expr $src_expr ^(FROM $from_expr)? ^(REPEAT $repeat_expr)? ))
 	;
 f_substring
-	:	SUBSTRING '(' sexpr=expr FROM start=expr (FOR end=expr)? ')'
+	:	SUBSTRING '(' sexpr=expression FROM start=expression (FOR end=expression)? ')'
 	->	^(ESQL_FUNCTION_CALL SUBSTRING $start $end?)
 	;	
 	
 			
 
 // Expression
-expr	:	is_expr;
+expression	:	is_expr;
 
 is_expr	:	in_expr (IS^ NOT? (BOOL | 'INF' | '+INF' | '-INF' | 'INFINITY' | '+INFINITY' | '-INFINITY' | 'NAN' | 'NULL' | 'NUM' | 'NUMBER' | 'UNKNOWN'))?;  		
 
-in_expr	:	exists_expr (NOT? IN^ lst_expr)*;
+in_expr	:	exists_expr (NOT? IN^ '('! expression ('\,'! expression)* ')'! )?;
 
 exists_expr
 	:	EXISTS^? between_expr;	
 
 between_expr	
-	:	colon_expr (NOT? BETWEEN_OP^ (ASYMMETRIC | SYMMETRIC)? colon_expr)*;
+	:	eq_expr (NOT? BETWEEN_OP^ (ASYMMETRIC | SYMMETRIC)? eq_expr)*;
+
+eq_expr	:	colon_expr (EQ_OP^ colon_expr)*;
 
 colon_expr
-	:	dot_expr (':'^ dot_expr)*;
+	:	logic_expr (':'^ logic_expr)*;
 	
-dot_expr:	logic_expr ('.'^ logic_expr)*;
-	
-logic_expr:	eq_expr (BINARY_LOGICAL_OP^ eq_expr)*;
-	
-eq_expr	:	sc_expr	(EQ_OP^ sc_expr)*;
+logic_expr:	logic_not_expr (BINARY_LOGICAL_OP^ logic_not_expr)*;
+
+logic_not_expr
+	:	NOT^ logic_not_expr | sc_expr;
 
 sc_expr	:	concat_expr (SIMPLE_COMPARE_OP^ concat_expr)*;
 
 concat_expr	
-	:	lst_expr (CONCAT_OP^ lst_expr)*;
-
-lst_expr:	add_expr ('\,' add_expr)* -> add_expr+;		
+	:	add_expr (CONCAT_OP^ add_expr)*;	
 
 add_expr
 	:	mult_expr ( (PLUS_OP^ | MINUS_OP^) mult_expr )*;
 
 mult_expr
-	:	ulogic_expr ( (MULT_OP^ | DIV_OP^) ulogic_expr)*;
+	:	dot_expr ( (MULT_OP^ | DIV_OP^) dot_expr)*;
 
-ulogic_expr	
-	:	NOT^? arr_expr;
+dot_expr	
+	:	arr_expr (DOT_OP^ arr_expr)*;
 	
-arr_expr:	atom ('['^ atom? ']'!)*;
-	
-atom	:	f_sql_code | f_sql_err_text| f_sql_nerror | f_sql_state | 
-		f_extract | f_cur_date | f_cur_time | f_cur_timestamp | f_cur_gmt_date | f_cur_gmt_time | f_cur_gmt_timestamp | f_loc_timezone |
-		f_num_round | f_overlay | f_position | f_substring | 
-		ID | MINUS_OP^? INT | STRING | BOOL | NULL | LITERAL | '('! expr ')'!;
+arr_expr:	unary_expr ('['^ expression? ']'!)*;
 
+unary_expr 
+    	:  	MINUS_OP^ unary_expr | atom;
+	
+atom	:	  f_sql_code 
+		| f_sql_err_text
+		| f_sql_nerror 
+		| f_sql_state 
+		| f_extract 
+		| f_cur_date 
+		| f_cur_time 
+		| f_cur_timestamp 
+		| f_cur_gmt_date 
+		| f_cur_gmt_time 
+		| f_cur_gmt_timestamp 
+		| f_loc_timezone 
+		| f_overlay 
+		| f_position 
+		| f_substring 
+		| IDENTIFIER
+		| INTLITERAL 
+		| STRINGLITERAL 
+		| BOOL 
+		| NULL 
+		| QUOTEDSTRING 
+		| '('! expression ')'!
+		;
 
 // Simple comparison operators
 SIMPLE_COMPARE_OP
@@ -712,7 +723,7 @@ DIV_OP	:	'/';
 
 CONCAT_OP
 	:	'||';
-
+DOT_OP	:	'.';
 	
 // ESQL types
 type		:	T_BOOL | T_BOOLEAN | T_DATE | T_TIME | T_GMTTIME | T_TIMESTAMP | T_GMTTIMESTAMP | T_CHAR | T_CHARACTER 
@@ -902,11 +913,12 @@ T_ROW	:	'ROW';
 // ESQL data types values
 NULL	:	'NULL';
 BOOL	:	'TRUE' | 'FALSE';
-INT	:	('0'..'9')+;
-STRING	:	'"' ( ESC_SEQ | ~('\\'|'"') )* '"';
-LITERAL	:	'\'' .+ '\'';
+INTLITERAL	
+	:	('0'..'9')+;
+STRINGLITERAL	:	'"' ( ESC_SEQ | ~('\\'|'"') )* '"';
+QUOTEDSTRING	:	'\'' .+ '\'';
 
-ID  :	('a'..'z'|'A'..'Z'|'_') ('a'..'z'|'A'..'Z'|'0'..'9'|'_')*
+IDENTIFIER  :	('a'..'z' | 'A'..'Z' | '_') ('a'..'z' | 'A'..'Z' | '0'..'9' | '_')*
     ;
 
 //Standard syntactic elements 

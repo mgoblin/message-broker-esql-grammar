@@ -4,26 +4,28 @@ gunit Esql;
 //
 // Primitives
 //
-ID:
+IDENTIFIER:
     "X" OK
     "XYZ" OK
     "Xyz" OK
     "XyZ" OK
     "_X" OK
     "1X" FAIL
-INT:
+INTLITERAL:
     "1" OK
 
-LITERAL:
+QUOTEDSTRING:
     "'http://esql.ru'" OK
 
-atom    :
+atom:
    "10" -> "10"
    "\"Hello\"" -> "\"Hello\""
    "Var" -> "Var"
    "TRUE" -> "TRUE"
    "FALSE" -> "FALSE"
-   "-10" -> (- 10)
+
+unary_expr:
+    "-10" -> (- 10)
 
 sc_expr:
     "1 > 2" -> (> 1 2)
@@ -39,8 +41,8 @@ exists_expr:
     "EXISTS (1)" -> (EXISTS 1)
 
 in_expr:
-    "z IN 1, 2, 5" -> (IN z 1 2 5)
-    "z NOT IN 1, 2, 5" -> (IN z NOT 1 2 5)
+    "z IN (1, 2, 5)" -> (IN z 1 2 5)
+    "z NOT IN (1, 2, 5)" -> (IN z NOT 1 2 5)
 
 is_expr:
     "A IS NULL" -> (IS A NULL)
@@ -54,7 +56,7 @@ add_expr:
    "1 + 3" -> (+ 1 3)
    "3 - 1" -> (- 3 1)
    "1 + 2 + 3 - 4" -> (- (+ (+ 1 2) 3) 4)
-   " a + x" -> (+ a x)
+   "a + x" -> (+ a x)
    "x + 10" -> ( + x 10)
    "(1 + 2) + (5 + 6)" -> ( + (+ 1 2) (+ 5 6))
    "(1 + x) + (x - 6)" -> ( + (+ 1 x) (- x 6))
@@ -69,7 +71,6 @@ mult_expr:
 
 logic_expr:
     "a > b AND x < y" -> (AND (> a b) (< x y))
-    "NOT (a > b) = TRUE" -> "(= (NOT (> a b)) TRUE)"
 
 dot_expr:
     "OutputRoot.XMLNSC.Data.Order" -> (. (. (. OutputRoot XMLNSC) Data) Order)
@@ -83,10 +84,11 @@ arr_expr:
     "Order[2]" -> ([ Order 2)
     "Order[]" -> ([ Order)
 
-expr:
+expression:
+    "NOT (a > b) = TRUE" -> "(= (NOT (> a b)) TRUE)"
     "OutputRoot.XMLNS.Invoice.Purchases.Item[1];" -> (. (. (. (. OutputRoot XMLNS) Invoice) Purchases) ([ Item 1))
-    "S.ACCOUNTNO = InputBody.AccountNumber" -> (. (. S (= ACCOUNTNO InputBody)) AccountNumber)
-    "x + 1 IN (1, 3, 5, 40)"-> (IN (+ x 1) 1 3 5 40)
+    "S.ACCOUNTNO = InputBody.AccountNumber" -> (= (. S ACCOUNTNO) (. InputBody AccountNumber))
+    "x IN (1, 3, 5, 40)"-> (IN x 1 3 5 40)
     "SQLCode1 = SQLCODE" -> (= SQLCode1 (ESQL_FUNCTION_CALL SQLCODE))
     "SQLErrorText1 = SQLERRORTEXT" -> (= SQLErrorText1 (ESQL_FUNCTION_CALL SQLERRORTEXT))
     "SQLNativeError1 = SQLNATIVEERROR" -> (= SQLNativeError1 (ESQL_FUNCTION_CALL SQLNATIVEERROR))
@@ -113,7 +115,7 @@ set_stat:
     "SET s = -10" -> (SET (= s (- 10)))
     "SET s = 1 - 3/4 + 5 * 2/(1+1)" -> (SET (= s (+ (- 1 (/ 3 4)) (/ (* 5 2) (+ 1 1)))))
     "SET OutputLocalEnvironment.Destination.RouterList.DestinationData[1].labelName = 'SettingsUpdateRq'"
-    -> (SET (. (. (. (. OutputLocalEnvironment Destination) RouterList) ([ DestinationData 1)) (= labelName 'SettingsUpdateRq')))
+    -> (SET (= (. (. (. (. OutputLocalEnvironment Destination) RouterList) ([ DestinationData 1)) labelName) 'SettingsUpdateRq'))
 
 if_stat:
     "IF 10 = 15 THEN END IF" -> (IF (COND (= 10 15)))
@@ -228,7 +230,7 @@ handler_stat:
 
 delete_from_stat:
     "DELETE FROM DATABASE.SHAREHOLDINGS AS S WHERE S.ACCOUNTNO = InputBody.AccountNumber"
-    ->(DELETE (DATABASE SHAREHOLDINGS) (AS S) (WHERE (. (. S (= ACCOUNTNO InputBody)) AccountNumber)))
+    ->(DELETE (DATABASE SHAREHOLDINGS) (AS S) (WHERE (= (. S ACCOUNTNO) (. InputBody AccountNumber))))
     "DELETE FROM DATABASE.{Source}.{Schema}.{Table}" -> (DELETE (DATABASE Source Schema Table))
 
 
@@ -273,7 +275,7 @@ loop_stat:
     -> (LOOP (PROPS X) (SET (= i (+ i 1))))
 
 move_stat:
-    "MOVE cursor FIRSTCHILD TYPE XML.Name 'Field1'" -> (MOVE cursor (FIRSTCHILD TYPE (. XML Name)))
+    "MOVE cursor FIRSTCHILD TYPE XML.Name.'Field1'" -> (MOVE cursor (FIRSTCHILD TYPE (. (. XML Name) 'Field1')))
     "MOVE sourceCursor NEXTSIBLING REPEAT TYPE NAME" -> (MOVE sourceCursor (REPEAT NEXTSIBLING TYPE NAME))
 
 pass_stat:
@@ -312,7 +314,7 @@ upd_stat:
   "UPDATE DATABASE.StockPrices AS SP SET PRICE = InputBody.Message.StockPrice"
   -> (UPDATE (DATABASE StockPrices) (AS SP) (SET (INIT PRICE (. (. InputBody Message) StockPrice))))
   "UPDATE DATABASE.StockPrices AS SP SET PRICE = InputBody.Message.StockPrice WHERE SP.COMPANY = InputBody.Message.Company"
-  -> (UPDATE (DATABASE StockPrices) (AS SP) (SET (INIT PRICE (. (. InputBody Message) StockPrice))) (WHERE (. (. (. SP (= COMPANY InputBody)) Message) Company)))
+  -> (UPDATE (DATABASE StockPrices) (AS SP) (SET (INIT PRICE (. (. InputBody Message) StockPrice))) (WHERE (= (. SP COMPANY) (. (. InputBody Message) Company))))
 
 statement:
     "SET SQLCode1 = SQLCODE;" -> (SET (= SQLCode1 (ESQL_FUNCTION_CALL SQLCODE)))
@@ -330,16 +332,13 @@ f_extract:
     "EXTRACT (MINUTE FROM CURRENT_GMTTIMESTAMP)" -> (ESQL_FUNCTION_CALL (EXTRACT MINUTE (ESQL_FUNCTION_CALL CURRENT_GMTTIMESTAMP)))
     "EXTRACT (MINUTE FROM LOCAL_TIMEZONE)" -> (ESQL_FUNCTION_CALL (EXTRACT MINUTE (ESQL_FUNCTION_CALL LOCAL_TIMEZONE)))
 
-f_num_round:
-    "ROUND(2, 0 MODE ROUND_DOWN)" -> (ESQL_FUNCTION_CALL (ROUND 2 0 (PROPS ROUND_DOWN)))
-
 f_overlay:
     "OVERLAY ('ABCDEFGHIJ' PLACING '1234' FROM 4 FOR 3)" -> (ESQL_FUNCTION_CALL (OVERLAY 'ABCDEFGHIJ' '1234' (PROPS 4 3)))
 
 f_position:
-    "POSITION('Town' IN 'Hursley Village');" -> (ESQL_FUNCTION_CALL (POSITION (IN 'Town' 'Hursley Village')))
-    "POSITION ('B' IN 'ABCABCABCABCABC' REPEAT 2)" -> (ESQL_FUNCTION_CALL (POSITION (IN 'B' 'ABCABCABCABCABC') REPEAT 2))
-    "POSITION ('BC' IN 'ABCABCABCABCABC' FROM 2 REPEAT -3)" -> (ESQL_FUNCTION_CALL (POSITION (IN 'BC' 'ABCABCABCABCABC') (FROM 2) REPEAT (- 3)))
+    "POSITION('Town' IN 'Hursley Village')" -> (ESQL_FUNCTION_CALL (POSITION 'Town' 'Hursley Village'))
+    "POSITION ('B' IN 'ABCABCABCABCABC' REPEAT 2)" -> (ESQL_FUNCTION_CALL (POSITION 'B' 'ABCABCABCABCABC' (REPEAT 2)))
+    "POSITION ('BC' IN 'ABCABCABCABCABC' FROM 2 REPEAT -3)" -> (ESQL_FUNCTION_CALL (POSITION 'BC' 'ABCABCABCABCABC' (FROM 2) (REPEAT (- 3))))
 
- f_substring:
+f_substring:
      "SUBSTRING('Hello World!' FROM 7 FOR 4)" -> (ESQL_FUNCTION_CALL SUBSTRING 7 4)
