@@ -21,7 +21,7 @@ tokens {
 	PARAMS;		
 	BODY;
 	ESQL_FUNCTION_CALL;
-	
+	FCALL;
 }
 // End AST node names
 
@@ -343,9 +343,9 @@ if_stat		:	IF ifexpr THEN
 		->	^(IF ^(COND ifexpr statement*) ^(COND elifexpr elifstatement*)* ^(ELSE elsestatement*)?)				 
 		;
 fragment
-  ifexpr	:	expression;
+  ifexpr	:	(expression | fcall_expr) => fcall_expr;
 fragment 
-  elifexpr	:	expression;
+  elifexpr	:	(expression | fcall_expr) => fcall_expr;
 fragment
   elifstatement	:	statement;
 fragment
@@ -558,6 +558,8 @@ fragment
 		->	^(WHILE ^(PROPS label) ^(COND expression) statement*)  
   		;
   		
+
+
 // ESQL Functions
 
 /*
@@ -637,11 +639,15 @@ f_substring
 	->	^(ESQL_FUNCTION_CALL SUBSTRING $start $end?)
 	;	
 	
-			
+
+fcall_expr
+	:	expression ('(' params? ')')?
+	->	^(FCALL expression params?);			
 
 // Expression
-expression	:	is_expr;
-
+expression	
+	:	is_expr;
+	
 is_expr	:	in_expr (IS^ NOT? (BOOL | 'INF' | '+INF' | '-INF' | 'INFINITY' | '+INFINITY' | '-INFINITY' | 'NAN' | 'NULL' | 'NUM' | 'NUMBER' | 'UNKNOWN'))?;  		
 
 in_expr	:	exists_expr (NOT? IN^ '('! expression ('\,'! expression)* ')'! )?;

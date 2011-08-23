@@ -118,8 +118,9 @@ set_stat:
     -> (SET (= (. (. (. (. OutputLocalEnvironment Destination) RouterList) ([ DestinationData 1)) labelName) 'SettingsUpdateRq'))
 
 if_stat:
-    "IF 10 = 15 THEN END IF" -> (IF (COND (= 10 15)))
-    "IF z = TRUE THEN SET x = 3 + 2; END IF" -> (IF (COND (= z TRUE) (SET (= x (+ 3 2)))))
+    "IF 10 = 15 THEN END IF" -> (IF (COND (FCALL (= 10 15))))
+    "IF z = TRUE THEN SET x = 3 + 2; END IF" -> (IF (COND (FCALL (= z TRUE)) (SET (= x (+ 3 2)))))
+    "IF LAST(x) THEN END IF" -> (IF (COND (FCALL LAST x)))
 
     <<
     IF 10 <= 15 THEN
@@ -127,7 +128,7 @@ if_stat:
     ELSE
        SET result = 'Bad';
     END IF
-     >> -> (IF (COND (<= 10 15) (SET (= result 'Good'))) (ELSE (SET (= result 'Bad'))))
+     >> -> (IF (COND (FCALL (<= 10 15)) (SET (= result 'Good'))) (ELSE (SET (= result 'Bad'))))
 
     <<
     IF 10 <= 15 THEN
@@ -136,7 +137,7 @@ if_stat:
        SET x = x + 1;
     END IF
     >>
-    -> (IF (COND (<= 10 15) (SET (= result 'Good'))) (COND (= x 10) (SET (= x (+ x 1)))))
+    -> (IF (COND (FCALL (<= 10 15)) (SET (= result 'Good'))) (COND (FCALL (= x 10)) (SET (= x (+ x 1)))))
 
     <<
     IF 10 <= 15 THEN
@@ -147,7 +148,7 @@ if_stat:
     ELSE SET z = 0;
     END IF
     >>
-    -> (IF (COND (<= 10 15) (SET (= result 'Good')) (SET (= x 0))) (COND (= x 10) (SET (= x (+ x 1)))) (ELSE (SET (= z 0))))
+    -> (IF (COND (FCALL (<= 10 15)) (SET (= result 'Good')) (SET (= x 0))) (COND (FCALL (= x 10)) (SET (= x (+ x 1)))) (ELSE (SET (= z 0))))
 
 ret_stat:
     "RETURN" -> "RETURN"
