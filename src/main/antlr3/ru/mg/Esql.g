@@ -90,8 +90,8 @@ fragment
 	call statement
 -------------------------------------------
 */
-call_stat	: 	CALL expression '(' params? ')' qualifiers? (INTO expression)?
-		->	^(CALL expression ^(PARAMS params)? ^(INTO expression)? qualifiers?)
+call_stat	: 	CALL fcall_expr qualifiers? (INTO expression)?
+		->	^(CALL fcall_expr ^(INTO expression)? qualifiers?)
 		;			
 fragment
   routine_name	: 	IDENTIFIER
@@ -189,8 +189,8 @@ module_name 	:	IDENTIFIER;
 -------------------------------------------------------propagate_stat
 */
 func_decl_stat	:	CREATE func_type func_name '(' params_decl? ')' (RETURNS type)? (LANGUAGE language)?
-			  (statement | external)?
-		-> ^(func_type ^(func_name ^(PARAMS params_decl)? ^(RETURNS type)? ^(LANGUAGE language)? ^(BODY statement)? ^(BODY external)? ))		
+			  (beginend_stat | external)?
+		-> ^(func_type ^(func_name ^(PARAMS params_decl)? ^(RETURNS type)? ^(LANGUAGE language)? ^(BODY beginend_stat)? ^(BODY external)? ))		
 		;
 fragment
   func_name	: 	IDENTIFIER
@@ -343,9 +343,9 @@ if_stat		:	IF ifexpr THEN
 		->	^(IF ^(COND ifexpr statement*) ^(COND elifexpr elifstatement*)* ^(ELSE elsestatement*)?)				 
 		;
 fragment
-  ifexpr	:	(expression | fcall_expr) => fcall_expr;
+  ifexpr	:	expression;
 fragment 
-  elifexpr	:	(expression | fcall_expr) => fcall_expr;
+  elifexpr	:	expression;
 fragment
   elifstatement	:	statement;
 fragment
@@ -641,12 +641,14 @@ f_substring
 	
 
 fcall_expr
-	:	expression ('(' params? ')')?
-	->	^(FCALL expression params?);			
+	:	expr '(' params? ')'
+	->	^(FCALL expr ^(PARAMS params)?);			
 
 // Expression
 expression	
-	:	is_expr;
+	:	fcall_expr | expr;
+	
+expr	:	is_expr;	
 	
 is_expr	:	in_expr (IS^ NOT? (BOOL | 'INF' | '+INF' | '-INF' | 'INFINITY' | '+INFINITY' | '-INFINITY' | 'NAN' | 'NULL' | 'NUM' | 'NUMBER' | 'UNKNOWN'))?;  		
 
@@ -708,7 +710,7 @@ atom	:	  f_sql_code
 		| BOOL 
 		| NULL 
 		| QUOTEDSTRING 
-		| '('! expression ')'!
+		| '('! expr ')'!
 		;
 
 // Simple comparison operators

@@ -118,9 +118,9 @@ set_stat:
     -> (SET (= (. (. (. (. OutputLocalEnvironment Destination) RouterList) ([ DestinationData 1)) labelName) 'SettingsUpdateRq'))
 
 if_stat:
-    "IF 10 = 15 THEN END IF" -> (IF (COND (FCALL (= 10 15))))
-    "IF z = TRUE THEN SET x = 3 + 2; END IF" -> (IF (COND (FCALL (= z TRUE)) (SET (= x (+ 3 2)))))
-    "IF LAST(x) THEN END IF" -> (IF (COND (FCALL LAST x)))
+    "IF 10 = 15 THEN END IF" -> (IF (COND (= 10 15)))
+    "IF z = TRUE THEN SET x = 3 + 2; END IF" -> (IF (COND (= z TRUE) (SET (= x (+ 3 2)))))
+    "IF LAST(x) THEN END IF" -> (IF (COND (FCALL LAST (PARAMS x))))
 
     <<
     IF 10 <= 15 THEN
@@ -128,7 +128,7 @@ if_stat:
     ELSE
        SET result = 'Bad';
     END IF
-     >> -> (IF (COND (FCALL (<= 10 15)) (SET (= result 'Good'))) (ELSE (SET (= result 'Bad'))))
+     >> -> (IF (COND (<= 10 15) (SET (= result 'Good'))) (ELSE (SET (= result 'Bad'))))
 
     <<
     IF 10 <= 15 THEN
@@ -137,7 +137,7 @@ if_stat:
        SET x = x + 1;
     END IF
     >>
-    -> (IF (COND (FCALL (<= 10 15)) (SET (= result 'Good'))) (COND (FCALL (= x 10)) (SET (= x (+ x 1)))))
+    -> (IF (COND (<= 10 15) (SET (= result 'Good'))) (COND (= x 10) (SET (= x (+ x 1)))))
 
     <<
     IF 10 <= 15 THEN
@@ -148,7 +148,7 @@ if_stat:
     ELSE SET z = 0;
     END IF
     >>
-    -> (IF (COND (FCALL (<= 10 15)) (SET (= result 'Good')) (SET (= x 0))) (COND (FCALL (= x 10)) (SET (= x (+ x 1)))) (ELSE (SET (= z 0))))
+    -> (IF (COND (<= 10 15) (SET (= result 'Good')) (SET (= x 0))) (COND (= x 10) (SET (= x (+ x 1)))) (ELSE (SET (= z 0))))
 
 ret_stat:
     "RETURN" -> "RETURN"
@@ -181,8 +181,8 @@ detach_stat:
     "DETACH ref1" -> (DETACH ref1)
 
 call_stat:
-    "CALL myProc1() INTO cursor" -> (CALL myProc1 (INTO cursor))
-    "CALL schema.myProc(10, 'X')" -> (CALL (. schema myProc) (PARAMS 10 'X'))
+    "CALL myProc1() INTO cursor" -> (CALL (FCALL myProc1) (INTO cursor))
+    "CALL schema.myProc(10, 'X')" -> (CALL (FCALL (. schema myProc) (PARAMS 10 'X')))
 
 case_stat:
     <<
@@ -194,7 +194,7 @@ case_stat:
         CALL procedure2(5);
     END CASE
     >>
-    -> (CASE (COND (> 10 5)) (WHEN TRUE (CALL procedure1 (PARAMS 10)) (CALL procedure1 (PARAMS 15))) (WHEN FALSE (CALL procedure2 (PARAMS 5))))
+    -> (CASE (COND (> 10 5)) (WHEN TRUE (CALL (FCALL procedure1 (PARAMS 10))) (CALL (FCALL procedure1 (PARAMS 15)))) (WHEN FALSE (CALL (FCALL procedure2 (PARAMS 5)))))
 
     <<
     CASE
@@ -205,7 +205,7 @@ case_stat:
         CALL procedure2(5);
     END CASE
     >>
-    -> (CASE (WHEN (> 10 5) (CALL procedure1 (PARAMS 10)) (CALL procedure1 (PARAMS 15))) (ELSE (CALL procedure2 (PARAMS 5))))
+    -> (CASE (WHEN (> 10 5) (CALL (FCALL procedure1 (PARAMS 10))) (CALL (FCALL procedure1 (PARAMS 15)))) (ELSE (CALL (FCALL procedure2 (PARAMS 5)))))
 
 create_stat:
     <<
@@ -218,6 +218,12 @@ func_decl_stat:
     <<
       CREATE FUNCTION itsFunction()
     >> -> (FUNCTION itsFunction)
+
+    <<
+    CREATE PROCEDURE GetExcDescription(IN InputExcList REFERENCE, OUT sErrDescr CHARACTER, OUT sErrNumber CHARACTER)
+    BEGIN
+    END
+    >> -> (PROCEDURE (GetExcDescription (PARAMS (REFERENCE InputExcList IN) (CHARACTER sErrDescr OUT) (CHARACTER sErrNumber OUT)) (BODY BEGIN)))
 
 handler_stat:
     "DECLARE CONTINUE HANDLER FOR SQLSTATE LIKE '%' BEGIN END;"
