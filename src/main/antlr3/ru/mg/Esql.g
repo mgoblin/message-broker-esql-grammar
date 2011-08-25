@@ -626,6 +626,17 @@ f_loc_timezone
 	:	LOCAL_TIMEZONE	
 	->	^(ESQL_FUNCTION_CALL LOCAL_TIMEZONE)
 	;
+	
+// Numeric function
+f_round	:	ROUND '(' src=expression '\,' precision=expression (MODE rounding_mode)? ')'
+	->	^(ESQL_FUNCTION_CALL ROUND $src $precision rounding_mode)
+	;
+fragment
+  rounding_mode	
+  	:	'ROUND_UP' | 'ROUND_DOWN' | 'ROUND_CEILING' | 'ROUND_FLOOR' | 'ROUND_HALF_EVEN' | 'ROUND_HALF_DOWN'
+  	;		
+	
+	
 f_overlay
 	:	OVERLAY '(' e1=QUOTEDSTRING 'PLACING' e2=QUOTEDSTRING FROM fexpr=expression (FOR forexpr=expression)? ')'
 	->	^(ESQL_FUNCTION_CALL ^(OVERLAY $e1 $e2 ^(PROPS $fexpr $forexpr?)))
@@ -700,7 +711,8 @@ atom	:	  f_sql_code
 		| f_cur_gmt_date 
 		| f_cur_gmt_time 
 		| f_cur_gmt_timestamp 
-		| f_loc_timezone 
+		| f_loc_timezone
+		| f_round 
 		| f_overlay 
 		| f_position 
 		| f_substring 
