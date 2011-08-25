@@ -355,4 +355,9 @@ f_position:
     "POSITION ('BC' IN 'ABCABCABCABCABC' FROM 2 REPEAT -3)" -> (ESQL_FUNCTION_CALL (POSITION 'BC' 'ABCABCABCABCABC' (FROM 2) (REPEAT (- 3))))
 
 f_substring:
-     "SUBSTRING('Hello World!' FROM 7 FOR 4)" -> (ESQL_FUNCTION_CALL SUBSTRING 7 4)
+     "SUBSTRING('Hello World!' FROM 7 FOR 4)" -> (ESQL_FUNCTION_CALL SUBSTRING (FROM 7) 4)
+
+f_trim:
+     "TRIM(TRAILING 'b' FROM 'aaabBb')" -> (ESQL_FUNCTION_CALL TRIM 'aaabBb' TRAILING 'b' FROM)
+     "TRIM('a')" -> (ESQL_FUNCTION_CALL TRIM 'a')
+     "TRIM( whiteSpace FROM input2)" -> (ESQL_FUNCTION_CALL TRIM input2 whiteSpace FROM)

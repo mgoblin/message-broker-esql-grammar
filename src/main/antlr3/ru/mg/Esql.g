@@ -638,7 +638,7 @@ fragment
 	
 	
 f_overlay
-	:	OVERLAY '(' e1=QUOTEDSTRING 'PLACING' e2=QUOTEDSTRING FROM fexpr=expression (FOR forexpr=expression)? ')'
+	:	OVERLAY '(' e1=expression 'PLACING' e2=expression FROM fexpr=expression (FOR forexpr=expression)? ')'
 	->	^(ESQL_FUNCTION_CALL ^(OVERLAY $e1 $e2 ^(PROPS $fexpr $forexpr?)))
 	;
 f_position
@@ -646,9 +646,20 @@ f_position
 	-> 	^(ESQL_FUNCTION_CALL ^(POSITION $search_expr $src_expr ^(FROM $from_expr)? ^(REPEAT $repeat_expr)? ))
 	;
 f_substring
-	:	SUBSTRING '(' sexpr=expression FROM start=expression (FOR end=expression)? ')'
-	->	^(ESQL_FUNCTION_CALL SUBSTRING $start $end?)
-	;	
+	:	SUBSTRING '(' sexpr=expression substring_pos (FOR end=expression)? ')'
+	->	^(ESQL_FUNCTION_CALL SUBSTRING substring_pos $end?)
+	;
+fragment
+  substring_pos
+  	:	(FROM^ expression) | (BEFORE^ expression) | (AFTER^ expression)
+  	;
+f_trim	:	TRIM '(' trim_cause? expression')'
+	->	^(ESQL_FUNCTION_CALL TRIM expression trim_cause?)
+	;
+fragment
+  trim_cause
+  	:	(expression | (BOTH | LEADING | TRAILING) expression?)? FROM
+  	;	  			
 	
 
 fcall_expr
@@ -716,6 +727,7 @@ atom	:	  f_sql_code
 		| f_overlay 
 		| f_position 
 		| f_substring 
+		| f_trim
 		| IDENTIFIER
 		| INTLITERAL 
 		| STRINGLITERAL 
@@ -768,6 +780,15 @@ ROUND		:	'ROUND';
 OVERLAY		:	'OVERLAY';
 POSITION	:	'POSITION';
 SUBSTRING	:	'SUBSTRING';
+
+BEFORE		:	'BEFORE';
+AFTER		:	'AFTER';
+
+TRIM		:	'TRIM';
+BOTH		:	'BOTH';
+LEADING		:	'LEADING';
+TRAILING	:	'TRAILING';
+
 
 //DateTime parts
 YEAR		:	'YEAR';
