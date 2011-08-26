@@ -361,3 +361,6 @@ f_trim:
      "TRIM(TRAILING 'b' FROM 'aaabBb')" -> (ESQL_FUNCTION_CALL TRIM 'aaabBb' TRAILING 'b' FROM)
      "TRIM('a')" -> (ESQL_FUNCTION_CALL TRIM 'a')
      "TRIM( whiteSpace FROM input2)" -> (ESQL_FUNCTION_CALL TRIM input2 whiteSpace FROM)
+
+f_asbitstream:
+     "ASBITSTREAM(cursor OPTIONS options CCSID 1208)" -> (ESQL_FUNCTION_CALL ASBITSTREAM cursor (OPTIONS options))

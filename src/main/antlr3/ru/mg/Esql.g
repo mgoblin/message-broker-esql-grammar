@@ -659,7 +659,22 @@ f_trim	:	TRIM '(' trim_cause? expression')'
 fragment
   trim_cause
   	:	(expression | (BOTH | LEADING | TRAILING) expression?)? FROM
-  	;	  			
+  	;
+  	
+// Field functions
+f_asbitstream
+	:	ASBITSTREAM '(' expression stream_options* ')'
+	->	^(ESQL_FUNCTION_CALL ASBITSTREAM expression stream_options*)
+	;
+fragment
+  stream_options
+  	:	  OPTIONS^ expression 
+  		| ENCODING^ expression 
+  		| CCSID^ expression
+  		| SET^ expression 
+  		| TYPE^ expression
+  		| FORMAT^ expression
+  	;		
 	
 
 fcall_expr
@@ -728,6 +743,7 @@ atom	:	  f_sql_code
 		| f_position 
 		| f_substring 
 		| f_trim
+		| f_asbitstream
 		| IDENTIFIER
 		| INTLITERAL 
 		| STRINGLITERAL 
@@ -788,6 +804,11 @@ TRIM		:	'TRIM';
 BOTH		:	'BOTH';
 LEADING		:	'LEADING';
 TRAILING	:	'TRAILING';
+
+ASBITSTREAM	:	'ASBITSTREAM';
+ENCODING	:	'ENCODING';
+CCSID		:	'CCSID';
+FORMAT		:	'FORMAT';
 
 
 //DateTime parts
