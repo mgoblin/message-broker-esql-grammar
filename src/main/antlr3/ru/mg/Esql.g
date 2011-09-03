@@ -711,8 +711,47 @@ fragment
   	
 f_cast	:	CAST '(' params AS type (CCSID ccsid=expression)? (ENCODING encoding=expression)? (FORMAT format=expression)? (DEFAULT def=expression)? ')'
 	-> 	^(CAST params type ^(PROPS ^(CCSID $ccsid)? ^(ENCODING $encoding)? ^(FORMAT $format)? ^(DEFAULT $def)?))
-	;  	
-  	 
+	;
+	
+f_select:	SELECT select_clause select_from_clause where_clause?
+	->	^(SELECT select_clause select_from_clause where_clause?)
+	;
+fragment
+  select_clause_i1	
+  	:	e=expression e2=(AS^ expression | INSERT^)?
+  	;
+fragment 
+  select_clause_i2
+  	:	ITEM^ expression
+  	;
+fragment
+  select_clause_aggregates
+  	:	agg=(COUNT | MAX | MIN | SUM) '(' expression ')'
+  	->	^($agg expression)
+  	;
+fragment
+  select_item
+  	:	select_clause_i1 | select_clause_i2 | select_clause_aggregates | '*'
+  	;  	
+fragment
+  select_clause
+  	:	select_item ('\,' select_item)*
+  	->	select_item+
+  	;
+fragment
+  select_from_clause
+  	:	FROM^ from_list
+  	;
+fragment
+  from_list
+  	:	from_item ('\,' from_item)*
+  	->	from_item+
+  	;
+fragment
+  from_item
+  	:	expression (AS^ expression)?	
+  	;
+  	  	  	  	  	 
 
 // Expression
 expression	
@@ -780,6 +819,7 @@ atom	:	  f_sql_code
 		| f_for
 		| f_case
 		| f_cast
+		| f_select
 		| IDENTIFIER
 		| INTLITERAL 
 		| STRINGLITERAL 
@@ -874,6 +914,13 @@ ANY		:	'ANY';
 SOME		:	'SOME';
 
 CAST		:	'CAST';
+SELECT		:	'SELECT';
+ITEM		:	'ITEM';
+COUNT		:	'COUNT';
+MAX		:	'MAX';
+MIN		:	'MIN';
+SUM		:	'SUM';
+
 		
 // ESQL keywords
 AS	:	'AS';
