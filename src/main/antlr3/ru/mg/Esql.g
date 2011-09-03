@@ -674,7 +674,21 @@ fragment
   		| SET^ expression 
   		| TYPE^ expression
   		| FORMAT^ expression
-  	;		
+  	;
+  	
+f_for	:	FOR (modificator=(ALL | ANY | SOME))? f_for_list '(' expr ')'
+	->	^(FOR ^(PROPS $modificator?) ^(PARAMS f_for_list) expr)
+	;
+fragment
+  f_for_list	
+  	:	f_for_list_element ('\,' f_for_list_element)*
+  	->	f_for_list_element+
+  	;
+fragment
+  f_for_list_element
+  	:	expr (AS as_expr=expr)?
+  	->	^(AS expr $as_expr)
+  	;  		  			
 	
 
 fcall_expr
@@ -744,6 +758,7 @@ atom	:	  f_sql_code
 		| f_substring 
 		| f_trim
 		| f_asbitstream
+		| f_for
 		| IDENTIFIER
 		| INTLITERAL 
 		| STRINGLITERAL 
@@ -831,6 +846,11 @@ ISLEAPYEAR	:	'ISLEAPYEAR';
 
 // Round modes
 MODE		:	'MODE';
+
+// FOR modifiers
+ALL		:	'ALL';
+ANY		:	'ANY';
+SOME		:	'SOME';
 		
 // ESQL keywords
 AS	:	'AS';

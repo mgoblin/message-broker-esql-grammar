@@ -363,4 +363,8 @@ f_trim:
      "TRIM( whiteSpace FROM input2)" -> (ESQL_FUNCTION_CALL TRIM input2 whiteSpace FROM)
 
 f_asbitstream:
-     "ASBITSTREAM(cursor OPTIONS options CCSID 1208)" -> (ESQL_FUNCTION_CALL ASBITSTREAM cursor (OPTIONS options))
+     "ASBITSTREAM(cursor OPTIONS options CCSID 1208)" -> (ESQL_FUNCTION_CALL ASBITSTREAM cursor (OPTIONS options) (CCSID 1208))
+
+f_for:
+     "FOR ALL Body.Invoice.Purchases.Item[] AS I (I.Quantity <= 50)"
+     -> (FOR PROPS (PARAMS (AS (. (. (. Body Invoice) Purchases) ([ Item)) I)) (<= (. I Quantity) 50))
