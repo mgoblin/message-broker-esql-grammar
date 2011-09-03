@@ -395,3 +395,6 @@ f_case:
     END
     >>
     -> (CASE (WHEN (= Month '01') 'January') (WHEN (= Month '02') 'February') (WHEN (= Month '03') 'March') (WHEN (= Month '04') 'April') (WHEN (= Month '05') 'May') (WHEN (= Month '06') 'June') (ELSE 'Second half of year'))
+
+f_cast:
+    "CAST(source AS CHARACTER FORMAT pattern)" -> (CAST source CHARACTER (PROPS (FORMAT pattern)))

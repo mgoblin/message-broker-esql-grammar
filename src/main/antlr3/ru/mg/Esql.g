@@ -701,13 +701,17 @@ f_case	:	CASE case_clause (ELSE expr)? END
 	;				
 fragment
   case_clause
-  	:	expr? (when_clause)+
+  	:	expression? (when_clause)+
   	;
 fragment
   when_clause
-  	:	WHEN test=expr THEN then=expr
+  	:	WHEN test=expression THEN then=expression
   	->	^(WHEN $test $then)
   	;
+  	
+f_cast	:	CAST '(' params AS type (CCSID ccsid=expression)? (ENCODING encoding=expression)? (FORMAT format=expression)? (DEFAULT def=expression)? ')'
+	-> 	^(CAST params type ^(PROPS ^(CCSID $ccsid)? ^(ENCODING $encoding)? ^(FORMAT $format)? ^(DEFAULT $def)?))
+	;  	
   	 
 
 // Expression
@@ -775,6 +779,7 @@ atom	:	  f_sql_code
 		| f_asbitstream
 		| f_for
 		| f_case
+		| f_cast
 		| IDENTIFIER
 		| INTLITERAL 
 		| STRINGLITERAL 
@@ -867,6 +872,8 @@ MODE		:	'MODE';
 ALL		:	'ALL';
 ANY		:	'ANY';
 SOME		:	'SOME';
+
+CAST		:	'CAST';
 		
 // ESQL keywords
 AS	:	'AS';
