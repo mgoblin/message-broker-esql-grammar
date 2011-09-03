@@ -750,7 +750,10 @@ fragment
 
 f_row	:	T_ROW '(' from_list ')'
 	->	^(T_ROW from_list)
-	;  	
+	;
+f_list	:	LIST '{' params '}'
+	->	^(LIST params)
+	;	  	
   	  	  	  	  	 
 
 // Expression
@@ -825,6 +828,7 @@ atom	:	  f_sql_code
 		| f_cast
 		| f_select
 		| f_row
+		| f_list
 		| IDENTIFIER
 		| INTLITERAL 
 		| STRINGLITERAL 
@@ -925,6 +929,8 @@ COUNT		:	'COUNT';
 MAX		:	'MAX';
 MIN		:	'MIN';
 SUM		:	'SUM';
+
+LIST		:	'LIST';
 
 		
 // ESQL keywords

@@ -407,3 +407,6 @@ f_select:
 
 f_row:
     "ROW('granary' AS bread,'riesling' AS wine, 'stilton' AS cheese)" -> (ROW (AS 'granary' bread) (AS 'riesling' wine) (AS 'stilton' cheese))
+
+f_list:
+    "LIST{'Henri','McGough','Patten'}" -> (LIST 'Henri' 'McGough' 'Patten')
