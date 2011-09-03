@@ -693,7 +693,22 @@ fragment
 
 fcall_expr
 	:	expr '(' params? ')'
-	->	^(FCALL expr ^(PARAMS params)?);			
+	->	^(FCALL expr ^(PARAMS params)?);
+	
+// Complex functions
+f_case	:	CASE case_clause (ELSE expr)? END
+	->	^(CASE case_clause ^(ELSE expr)?)
+	;				
+fragment
+  case_clause
+  	:	expr? (when_clause)+
+  	;
+fragment
+  when_clause
+  	:	WHEN test=expr THEN then=expr
+  	->	^(WHEN $test $then)
+  	;
+  	 
 
 // Expression
 expression	
@@ -759,6 +774,7 @@ atom	:	  f_sql_code
 		| f_trim
 		| f_asbitstream
 		| f_for
+		| f_case
 		| IDENTIFIER
 		| INTLITERAL 
 		| STRINGLITERAL 

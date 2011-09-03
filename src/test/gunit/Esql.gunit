@@ -368,3 +368,30 @@ f_asbitstream:
 f_for:
      "FOR ALL Body.Invoice.Purchases.Item[] AS I (I.Quantity <= 50)"
      -> (FOR PROPS (PARAMS (AS (. (. (. Body Invoice) Purchases) ([ Item)) I)) (<= (. I Quantity) 50))
+
+f_case:
+    <<
+    CASE CurrentMonth
+      WHEN '01' THEN 'January'
+      WHEN '02' THEN 'February'
+      WHEN '03' THEN 'March'
+      WHEN '04' THEN 'April'
+      WHEN '05' THEN 'May'
+      WHEN '06' THEN 'June'
+      ELSE 'Second half of year'
+    END
+    >>
+    -> (CASE CurrentMonth (WHEN '01' 'January') (WHEN '02' 'February') (WHEN '03' 'March') (WHEN '04' 'April') (WHEN '05' 'May') (WHEN '06' 'June') (ELSE 'Second half of year'))
+
+    <<
+    CASE
+      WHEN Month = '01' THEN 'January'
+      WHEN Month = '02' THEN 'February'
+      WHEN Month = '03' THEN 'March'
+      WHEN Month = '04' THEN 'April'
+      WHEN Month = '05' THEN 'May'
+      WHEN Month = '06' THEN 'June'
+      ELSE 'Second half of year'
+    END
+    >>
+    -> (CASE (WHEN (= Month '01') 'January') (WHEN (= Month '02') 'February') (WHEN (= Month '03') 'March') (WHEN (= Month '04') 'April') (WHEN (= Month '05') 'May') (WHEN (= Month '06') 'June') (ELSE 'Second half of year'))
