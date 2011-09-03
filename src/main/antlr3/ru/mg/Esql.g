@@ -690,10 +690,6 @@ fragment
   	->	^(AS expr $as_expr)
   	;  		  			
 	
-
-fcall_expr
-	:	expr '(' params? ')'
-	->	^(FCALL expr ^(PARAMS params)?);
 	
 // Complex functions
 f_case	:	CASE case_clause (ELSE expr)? END
@@ -751,11 +747,19 @@ fragment
   from_item
   	:	expression (AS^ expression)?	
   	;
+
+f_row	:	T_ROW '(' from_list ')'
+	->	^(T_ROW from_list)
+	;  	
   	  	  	  	  	 
 
 // Expression
 expression	
 	:	fcall_expr | expr;
+	
+fcall_expr
+	:	expr '(' params? ')'
+	->	^(FCALL expr ^(PARAMS params)?);	
 	
 expr	:	is_expr;	
 	
@@ -820,6 +824,7 @@ atom	:	  f_sql_code
 		| f_case
 		| f_cast
 		| f_select
+		| f_row
 		| IDENTIFIER
 		| INTLITERAL 
 		| STRINGLITERAL 

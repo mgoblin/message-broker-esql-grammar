@@ -404,3 +404,6 @@ f_select:
     -> (SELECT (. P PartNumber) (. P Description) (. P Price) (FROM (AS (. (. (. Database DSN1) Shop) Parts) P)))
     "SELECT * FROM Database.Datasource.SchemaName.Table As A"
     -> (SELECT * (FROM (. (. (. Database Datasource) SchemaName) Table)))
+
+f_row:
+    "ROW('granary' AS bread,'riesling' AS wine, 'stilton' AS cheese)" -> (ROW (AS 'granary' bread) (AS 'riesling' wine) (AS 'stilton' cheese))
