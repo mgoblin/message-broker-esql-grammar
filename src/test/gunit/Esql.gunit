@@ -410,3 +410,7 @@ f_row:
 
 f_list:
     "LIST{'Henri','McGough','Patten'}" -> (ESQL_FUNCTION_CALL LIST 'Henri' 'McGough' 'Patten')
+
+f_passthru:
+     "PASSTHRU('SELECT R.* FROM Schema1.Table1 AS R WHERE R.Name = ? OR R.Name = ? ORDER BY Name' TO DATABASE.DSN1 VALUES ('1', '2'))"
+     -> (ESQL_FUNCTION_CALL PASSTHRU (PARAMS 'SELECT R.* FROM Schema1.Table1 AS R WHERE R.Name = ? OR R.Name = ? ORDER BY Name') (TO (DATABASE DSN1)) (VALUES '1' '2'))

@@ -753,8 +753,18 @@ f_row	:	T_ROW '(' from_list ')'
 	;
 f_list	:	LIST '{' params '}'
 	->	^(ESQL_FUNCTION_CALL LIST params)
-	;	  	
-  	  	  	  	  	 
+	;
+	
+// Misc functions
+f_passthru
+	:	PASSTHRU '(' params pass_vals? ')'
+	->	^(ESQL_FUNCTION_CALL PASSTHRU ^(PARAMS params) pass_vals?)
+	;
+fragment
+  pass_vals
+  	:	(TO table_ref)? (VALUES '(' params ')')?
+  	->	^(TO table_ref)? ^(VALUES params)?
+	;  	  	  	  	  	 
 
 // Expression
 expression	
@@ -829,6 +839,7 @@ atom	:	  f_sql_code
 		| f_select
 		| f_row
 		| f_list
+		| f_passthru
 		| IDENTIFIER
 		| INTLITERAL 
 		| STRINGLITERAL 
