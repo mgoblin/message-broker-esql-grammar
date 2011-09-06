@@ -367,7 +367,7 @@ f_asbitstream:
 
 f_for:
      "FOR ALL Body.Invoice.Purchases.Item[] AS I (I.Quantity <= 50)"
-     -> (FOR PROPS (PARAMS (AS (. (. (. Body Invoice) Purchases) ([ Item)) I)) (<= (. I Quantity) 50))
+     -> (ESQL_FUNCTION_CALL FOR PROPS (PARAMS (AS (. (. (. Body Invoice) Purchases) ([ Item)) I)) (<= (. I Quantity) 50))
 
 f_case:
     <<
@@ -381,7 +381,7 @@ f_case:
       ELSE 'Second half of year'
     END
     >>
-    -> (CASE CurrentMonth (WHEN '01' 'January') (WHEN '02' 'February') (WHEN '03' 'March') (WHEN '04' 'April') (WHEN '05' 'May') (WHEN '06' 'June') (ELSE 'Second half of year'))
+    -> (ESQL_FUNCTION_CALL CASE CurrentMonth (WHEN '01' 'January') (WHEN '02' 'February') (WHEN '03' 'March') (WHEN '04' 'April') (WHEN '05' 'May') (WHEN '06' 'June') (ELSE 'Second half of year'))
 
     <<
     CASE
@@ -394,19 +394,19 @@ f_case:
       ELSE 'Second half of year'
     END
     >>
-    -> (CASE (WHEN (= Month '01') 'January') (WHEN (= Month '02') 'February') (WHEN (= Month '03') 'March') (WHEN (= Month '04') 'April') (WHEN (= Month '05') 'May') (WHEN (= Month '06') 'June') (ELSE 'Second half of year'))
+    -> (ESQL_FUNCTION_CALL CASE (WHEN (= Month '01') 'January') (WHEN (= Month '02') 'February') (WHEN (= Month '03') 'March') (WHEN (= Month '04') 'April') (WHEN (= Month '05') 'May') (WHEN (= Month '06') 'June') (ELSE 'Second half of year'))
 
 f_cast:
-    "CAST(source AS CHARACTER FORMAT pattern)" -> (CAST source CHARACTER (PROPS (FORMAT pattern)))
+    "CAST(source AS CHARACTER FORMAT pattern)" -> (ESQL_FUNCTION_CALL CAST source CHARACTER (PROPS (FORMAT pattern)))
 
 f_select:
     "SELECT P.PartNumber, P.Description, P.Price FROM Database.DSN1.Shop.Parts AS P"
-    -> (SELECT (. P PartNumber) (. P Description) (. P Price) (FROM (AS (. (. (. Database DSN1) Shop) Parts) P)))
+    -> (ESQL_FUNCTION_CALL SELECT (. P PartNumber) (. P Description) (. P Price) (FROM (AS (. (. (. Database DSN1) Shop) Parts) P)))
     "SELECT * FROM Database.Datasource.SchemaName.Table As A"
-    -> (SELECT * (FROM (. (. (. Database Datasource) SchemaName) Table)))
+    -> (ESQL_FUNCTION_CALL SELECT * (FROM (. (. (. Database Datasource) SchemaName) Table)))
 
 f_row:
-    "ROW('granary' AS bread,'riesling' AS wine, 'stilton' AS cheese)" -> (ROW (AS 'granary' bread) (AS 'riesling' wine) (AS 'stilton' cheese))
+    "ROW('granary' AS bread,'riesling' AS wine, 'stilton' AS cheese)" -> (ESQL_FUNCTION_CALL ROW (AS 'granary' bread) (AS 'riesling' wine) (AS 'stilton' cheese))
 
 f_list:
-    "LIST{'Henri','McGough','Patten'}" -> (LIST 'Henri' 'McGough' 'Patten')
+    "LIST{'Henri','McGough','Patten'}" -> (ESQL_FUNCTION_CALL LIST 'Henri' 'McGough' 'Patten')

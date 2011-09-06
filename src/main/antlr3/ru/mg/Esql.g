@@ -677,7 +677,7 @@ fragment
   	;
   	
 f_for	:	FOR (modificator=(ALL | ANY | SOME))? f_for_list '(' expr ')'
-	->	^(FOR ^(PROPS $modificator?) ^(PARAMS f_for_list) expr)
+	->	^(ESQL_FUNCTION_CALL FOR ^(PROPS $modificator?) ^(PARAMS f_for_list) expr)
 	;
 fragment
   f_for_list	
@@ -693,7 +693,7 @@ fragment
 	
 // Complex functions
 f_case	:	CASE case_clause (ELSE expr)? END
-	->	^(CASE case_clause ^(ELSE expr)?)
+	->	^(ESQL_FUNCTION_CALL CASE case_clause ^(ELSE expr)?)
 	;				
 fragment
   case_clause
@@ -706,11 +706,11 @@ fragment
   	;
   	
 f_cast	:	CAST '(' params AS type (CCSID ccsid=expression)? (ENCODING encoding=expression)? (FORMAT format=expression)? (DEFAULT def=expression)? ')'
-	-> 	^(CAST params type ^(PROPS ^(CCSID $ccsid)? ^(ENCODING $encoding)? ^(FORMAT $format)? ^(DEFAULT $def)?))
+	-> 	^(ESQL_FUNCTION_CALL CAST params type ^(PROPS ^(CCSID $ccsid)? ^(ENCODING $encoding)? ^(FORMAT $format)? ^(DEFAULT $def)?))
 	;
 	
 f_select:	SELECT select_clause select_from_clause where_clause?
-	->	^(SELECT select_clause select_from_clause where_clause?)
+	->	^(ESQL_FUNCTION_CALL SELECT select_clause select_from_clause where_clause?)
 	;
 fragment
   select_clause_i1	
@@ -749,10 +749,10 @@ fragment
   	;
 
 f_row	:	T_ROW '(' from_list ')'
-	->	^(T_ROW from_list)
+	->	^(ESQL_FUNCTION_CALL T_ROW from_list)
 	;
 f_list	:	LIST '{' params '}'
-	->	^(LIST params)
+	->	^(ESQL_FUNCTION_CALL LIST params)
 	;	  	
   	  	  	  	  	 
 
