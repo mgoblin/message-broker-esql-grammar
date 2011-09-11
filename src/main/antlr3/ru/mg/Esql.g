@@ -774,11 +774,14 @@ fcall_expr
 	:	expr '(' params? ')'
 	->	^(FCALL expr ^(PARAMS params)?);	
 	
-expr	:	like_expr;
+expr	:	singular_expr;
 
-like_expr
-	:	is_expr (NOT? LIKE^ is_expr (ESCAPE^ is_expr)? )?
+singular_expr
+	:	SINGULAR^? like_expr
 	;	
+	
+like_expr
+	:	is_expr (NOT? LIKE^ is_expr (ESCAPE^ is_expr)? )?;	
 	
 is_expr	:	in_expr (IS^ NOT? (BOOL | 'INF' | '+INF' | '-INF' | 'INFINITY' | '+INFINITY' | '-INFINITY' | 'NAN' | 'NULL' | 'NUM' | 'NUMBER' | 'UNKNOWN'))?;  		
 
@@ -1042,6 +1045,7 @@ SCHEMA	:	'SCHEMA';
 SET	:	'SET';
 SEVERITY:	'SEVERITY';
 SHARED	:	'SHARED';
+SINGULAR:	'SINGULAR';
 SQLSTATE:	'SQLSTATE';
 SYMMETRIC
 	:	'SYMMETRIC';

@@ -88,6 +88,9 @@ like_expr:
     "Body.Trade.Company LIKE 'I%'" -> (LIKE (. (. Body Trade) Company) 'I%')
     "Body.Trade.Company NOT LIKE 'I%'" -> (LIKE (. (. Body Trade) Company) NOT 'I%')
 
+singular_expr:
+    "SINGULAR(OutputRoot.XML.TMessage.BillNo[])" -> (SINGULAR (. (. (. OutputRoot XML) TMessage) ([ BillNo)))
+
 expression:
     "NOT (a > b) = TRUE" -> "(= (NOT (> a b)) TRUE)"
     "OutputRoot.XMLNS.Invoice.Purchases.Item[1];" -> (. (. (. (. OutputRoot XMLNS) Invoice) Purchases) ([ Item 1))
