@@ -74,6 +74,7 @@ logic_expr:
 
 dot_expr:
     "OutputRoot.XMLNSC.Data.Order" -> (. (. (. OutputRoot XMLNSC) Data) Order)
+    "OutputRoot.XML.{Value}" -> (. (. OutputRoot XML) ({ Value))
 
 colon_expr:
     "ru.sbrf:schemaLocation" -> (: (. ru sbrf) schemaLocation)
@@ -90,6 +91,7 @@ like_expr:
 
 singular_expr:
     "SINGULAR(OutputRoot.XML.TMessage.BillNo[])" -> (SINGULAR (. (. (. OutputRoot XML) TMessage) ([ BillNo)))
+
 
 expression:
     "NOT (a > b) = TRUE" -> "(= (NOT (> a b)) TRUE)"
@@ -245,7 +247,7 @@ handler_stat:
 delete_from_stat:
     "DELETE FROM DATABASE.SHAREHOLDINGS AS S WHERE S.ACCOUNTNO = InputBody.AccountNumber"
     ->(DELETE (DATABASE SHAREHOLDINGS) (AS S) (WHERE (= (. S ACCOUNTNO) (. InputBody AccountNumber))))
-    "DELETE FROM DATABASE.{Source}.{Schema}.{Table}" -> (DELETE (DATABASE Source Schema Table))
+    "DELETE FROM DATABASE.{Source}.{Schema}.{Table}" -> (DELETE (DATABASE (. (. ({ Source) ({ Schema)) ({ Table))))
 
 
 delete_stat:
@@ -265,7 +267,7 @@ for_stat:
 
 insert_stat:
     "INSERT INTO DATABASE.{Source}.{Schema}.{Table} (Name, Value) VALUES ('Joe', 12)"
-    -> (INSERT (DATABASE Source Schema Table) (PARAMS Name Value) (VALUES 'Joe' 12))
+    ->(INSERT (DATABASE (. (. ({ Source) ({ Schema)) ({ Table))) (PARAMS Name Value) (VALUES 'Joe' 12))
 
 iterate_stat:
     "ITERATE X" -> (ITERATE X)

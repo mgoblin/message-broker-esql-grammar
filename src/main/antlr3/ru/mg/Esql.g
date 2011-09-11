@@ -31,7 +31,7 @@ module	:	schema_stat
 //Statement
 statement	:	(var_decl | set_stat | if_stat | ret_stat | beginend_stat | while_stat | 
 			 attach_stat | detach_stat | call_stat | case_stat | create_stat | 
-			 func_decl_stat | handler_stat | delete_from_stat | delete_stat | eval_stat |
+			 func_decl_stat | handler_stat |  | delete_stat | eval_stat |
 			 for_stat | insert_stat | iterate_stat | leave_stat | log_stat | loop_stat | 
 			 move_stat | pass_stat |  propagate_stat | module_stat | repeat_stat | 
 			 resignal_stat | throw_stat | upd_stat) ';'!
@@ -177,7 +177,7 @@ module_stat	:	CREATE module_type MODULE module_name
 		-> 	^(MODULE module_name module_type statement*)
 		;	
 		
-module_type	:	'COMPUTE' | 'DATABASE' | 'FILTER';
+module_type	:	'COMPUTE' | DATABASE | 'FILTER';
 	
 module_name 	:	IDENTIFIER;
 
@@ -282,12 +282,7 @@ delete_from_stat:	DELETE FROM table_ref (AS IDENTIFIER)? where_clause?
 		->	^(DELETE table_ref ^(AS IDENTIFIER)? where_clause?)
 		;
 fragment
-  table_ref	:	DATABASE ('.' data_source_clause)+
-  		->	^(DATABASE data_source_clause+)
-  		;
-fragment
-  data_source_clause
-  		:	IDENTIFIER | ('{'! expression '}'!)
+  table_ref	:	DATABASE^ ('.'! expr)+
   		;
 fragment
   where_clause	:	WHERE^ expression
@@ -357,12 +352,9 @@ fragment
 	Insert statement
 -------------------------------------------
 */			
-insert_stat	:	INSERT INTO table_ref '(' column_name ('\,' column_name)* ')' VALUES value
-		->	^(INSERT table_ref ^(PARAMS column_name+) ^(VALUES value)) 
+insert_stat	:	INSERT INTO table_ref columns=value VALUES val=value
+		->	^(INSERT table_ref ^(PARAMS $columns) ^(VALUES $val)) 
 		;
-fragment
-  column_name	:	IDENTIFIER
-  		;
 fragment
   value		:	'('! params ')'!
   		;	  		
@@ -539,7 +531,10 @@ upd_stat	:	UPDATE table_ref (AS alias=expression)?
 fragment
   column_clause	:	column_name '=' expression
   		->	^(INIT column_name expression)
-  		;			
+  		;
+fragment
+  column_name	:	IDENTIFIER
+  		;  					
 // End of UPDATE statement				
 
 // While statement
@@ -813,14 +808,14 @@ add_expr
 
 mult_expr
 	:	dot_expr ( (MULT_OP^ | DIV_OP^) dot_expr)*;
-
+	
 dot_expr	
 	:	arr_expr (DOT_OP^ arr_expr)*;
 	
-arr_expr:	unary_expr ('['^ expression? ']'!)*;
+arr_expr:	unary_expr ('['^ expression? ']'!)*;	
 
 unary_expr 
-    	:  	MINUS_OP^ unary_expr | atom;
+    	:  	MINUS_OP^ unary_expr |  '{'^ unary_expr '}'! | atom;
 	
 atom	:	  f_sql_code 
 		| f_sql_err_text
