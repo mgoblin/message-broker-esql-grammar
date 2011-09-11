@@ -774,7 +774,11 @@ fcall_expr
 	:	expr '(' params? ')'
 	->	^(FCALL expr ^(PARAMS params)?);	
 	
-expr	:	is_expr;	
+expr	:	like_expr;
+
+like_expr
+	:	is_expr (NOT? LIKE^ is_expr (ESCAPE^ is_expr)? )?
+	;	
 	
 is_expr	:	in_expr (IS^ NOT? (BOOL | 'INF' | '+INF' | '-INF' | 'INFINITY' | '+INFINITY' | '-INFINITY' | 'NAN' | 'NULL' | 'NUM' | 'NUMBER' | 'UNKNOWN'))?;  		
 

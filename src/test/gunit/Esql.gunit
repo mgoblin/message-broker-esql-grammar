@@ -84,6 +84,10 @@ arr_expr:
     "Order[2]" -> ([ Order 2)
     "Order[]" -> ([ Order)
 
+like_expr:
+    "Body.Trade.Company LIKE 'I%'" -> (LIKE (. (. Body Trade) Company) 'I%')
+    "Body.Trade.Company NOT LIKE 'I%'" -> (LIKE (. (. Body Trade) Company) NOT 'I%')
+
 expression:
     "NOT (a > b) = TRUE" -> "(= (NOT (> a b)) TRUE)"
     "OutputRoot.XMLNS.Invoice.Purchases.Item[1];" -> (. (. (. (. OutputRoot XMLNS) Invoice) Purchases) ([ Item 1))
