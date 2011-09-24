@@ -16,6 +16,7 @@ INTLITERAL:
 
 QUOTEDSTRING:
     "'http://esql.ru'" OK
+    "''" OK
 
 atom:
    "10" -> "10"

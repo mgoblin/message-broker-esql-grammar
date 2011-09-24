@@ -1098,7 +1098,7 @@ BOOL	:	'TRUE' | 'FALSE';
 INTLITERAL	
 	:	('0'..'9')+;
 STRINGLITERAL	:	'"' ( ESC_SEQ | ~('\\'|'"') )* '"';
-QUOTEDSTRING	:	'\'' .+ '\'';
+QUOTEDSTRING	:	'\'' .* '\'';
 
 IDENTIFIER  :	('a'..'z' | 'A'..'Z' | '_') ('a'..'z' | 'A'..'Z' | '0'..'9' | '_')*
     ;
