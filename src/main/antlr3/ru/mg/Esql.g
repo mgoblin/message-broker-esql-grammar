@@ -812,7 +812,11 @@ mult_expr
 dot_expr	
 	:	arr_expr (DOT_OP^ arr_expr)*;
 	
-arr_expr:	unary_expr ('['^ expression? ']'!)*;	
+arr_expr:	unary_expr ('['^ aidx? ']'!)*;
+
+fragment
+  aidx	:	SIMPLE_COMPARE_OP | expression
+  	;
 
 unary_expr 
     	:  	MINUS_OP^ unary_expr |  '{'^ unary_expr '}'! | atom;
@@ -847,7 +851,8 @@ atom	:	  f_sql_code
 		| STRINGLITERAL 
 		| BOOL 
 		| NULL 
-		| QUOTEDSTRING 
+		| QUOTEDSTRING
+		| '*' 
 		| '('! expr ')'!
 		;
 
