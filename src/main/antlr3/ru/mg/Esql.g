@@ -62,7 +62,7 @@ fragment
   schema_name	:	 expression
   		;
 fragment
-  schema_path	:	schema_name ('\,' schema_name)* -> schema_name+	
+  schema_path	:	schema_name (',' schema_name)* -> schema_name+	
   		;
 fragment
   esql_contents	:	((func_decl_stat | var_decl | module_stat) ';'!)+
@@ -90,8 +90,8 @@ fragment
 	call statement
 -------------------------------------------
 */
-call_stat	: 	CALL fcall_expr qualifiers? (INTO expression)?
-		->	^(CALL fcall_expr ^(INTO expression)? qualifiers?)
+call_stat	: 	CALL fname=expression qualifiers? (INTO into=expression)?
+		->	^(CALL $fname ^(INTO $into)? qualifiers?)
 		;			
 fragment
   routine_name	: 	IDENTIFIER
@@ -106,7 +106,7 @@ fragment
   ext_sch	:	(EXTERNAL SCHEMA^ expression)
   		; 		 		
 fragment  		
-  params	:	expression ('\,'! expression)*
+  params	:	expression (','! expression)*
 		; 
 // End of call statement	
 
@@ -199,7 +199,7 @@ fragment
   func_type	:	FUNCTION | PROCEDURE
   		;
 fragment
-  params_decl	:	param_decl ('\,' param_decl)*
+  params_decl	:	param_decl (',' param_decl)*
 		->	(param_decl)*
 		;
 fragment
@@ -223,27 +223,24 @@ fragment
 
 /*
 ----------------------------------------------
-	DECLARE statements
-----------------------------------------------	
+DECLARE statements
+----------------------------------------------
 */
-var_decl	:	var_only_decl | const_decl| var_ns_decl | var_ctor_decl 
-		;
-		
-var_only_decl	:	DECLARE var_name ('\,' var_name)* var_modifier? type
-		->	^(VAR ^(var_name type var_modifier?))+
-		;
-const_decl	:	DECLARE var_name ('\,' var_name)* var_modifier? CONSTANT type expression
-		->	^(CONSTANT ^(var_name type var_modifier?))+ ^(INIT var_name expression)+	
-		;				
+var_decl 	: 	var_only_decl | const_decl| var_ns_decl | var_ctor_decl;
 
-var_ctor_decl	:	DECLARE var_name ('\,' var_name)* var_modifier? type expression
-		->	^(VAR ^(var_name type var_modifier?))+ ^(INIT var_name expression)+
+var_only_decl 	: 	DECLARE var_name (',' var_name)* var_modifier? type
+		-> 	^(VAR ^(var_name type var_modifier?))+
 		;
-		
-var_ns_decl	:	DECLARE var_name ('\,' var_name)* var_modifier? (NAMESPACE | NAME) expression
-		->	^(NS ^(var_name var_modifier?))+ ^(INIT var_name expression)+ 
-		;		
-		
+const_decl 	: 	DECLARE var_name (',' var_name)* var_modifier? CONSTANT type expression
+		-> 	^(CONSTANT ^(var_name type var_modifier?))+ ^(INIT var_name expression)+
+		;
+var_ctor_decl 	: 	DECLARE var_name (',' var_name)* var_modifier? type expression
+		-> 	^(VAR ^(var_name type var_modifier?))+ ^(INIT var_name expression)+
+		;
+var_ns_decl 	: 	DECLARE var_name (',' var_name)* var_modifier? (NAMESPACE | NAME) expression
+		-> 	^(NS ^(var_name var_modifier?))+ ^(INIT var_name expression)+
+		; 	
+	
 fragment 
   var_modifier	:	SHARED | EXTERNAL
 		;						
@@ -264,7 +261,7 @@ fragment
   handler_type	:	CONTINUE | EXIT
   		;			
 fragment 
-  states	: 	state_item ('\,' state_item)* 
+  states	: 	state_item (',' state_item)* 
 		-> 	state_item+
 		;
 fragment 
@@ -282,7 +279,7 @@ delete_from_stat:	DELETE FROM table_ref (AS IDENTIFIER)? where_clause?
 		->	^(DELETE table_ref ^(AS IDENTIFIER)? where_clause?)
 		;
 fragment
-  table_ref	:	DATABASE^ ('.'! expr)+
+  table_ref	:	DATABASE^ ('.'! expression)+
   		;
 fragment
   where_clause	:	WHERE^ expression
@@ -623,7 +620,7 @@ f_loc_timezone
 	;
 	
 // Numeric function
-f_round	:	ROUND '(' src=expression '\,' precision=expression (MODE rounding_mode)? ')'
+f_round	:	ROUND '(' src=expression ',' precision=expression (MODE rounding_mode)? ')'
 	->	^(ESQL_FUNCTION_CALL ROUND $src $precision rounding_mode)
 	;
 fragment
@@ -637,7 +634,7 @@ f_overlay
 	->	^(ESQL_FUNCTION_CALL ^(OVERLAY $e1 $e2 ^(PROPS $fexpr $forexpr?)))
 	;
 f_position
-	:	POSITION '(' search_expr=expression IN src_expr=colon_expr (FROM from_expr=expression)? (REPEAT repeat_expr=expression)? ')'
+	:	POSITION '(' search_expr=expression IN src_expr=expression (FROM from_expr=expression)? (REPEAT repeat_expr=expression)? ')'
 	-> 	^(ESQL_FUNCTION_CALL ^(POSITION $search_expr $src_expr ^(FROM $from_expr)? ^(REPEAT $repeat_expr)? ))
 	;
 f_substring
@@ -671,24 +668,20 @@ fragment
   		| FORMAT^ expression
   	;
   	
-f_for	:	FOR (modificator=(ALL | ANY | SOME))? f_for_list '(' expr ')'
-	->	^(ESQL_FUNCTION_CALL FOR ^(PROPS $modificator?) ^(PARAMS f_for_list) expr)
+f_for	:	FOR (modificator=(ALL | ANY | SOME))? f_for_list_element (',' f_for_list_element)*
+	->	^(ESQL_FUNCTION_CALL FOR ^(PROPS $modificator?) ^(PARAMS f_for_list_element+))
 	;
-fragment
-  f_for_list	
-  	:	f_for_list_element ('\,' f_for_list_element)*
-  	->	f_for_list_element+
-  	;
+
 fragment
   f_for_list_element
-  	:	expr (AS as_expr=expr)?
-  	->	^(AS expr $as_expr)
+  	:	e=expression (AS as_expr=expression)?
+  	->	^(AS $e $as_expr?)
   	;  		  			
 	
 	
 // Complex functions
-f_case	:	CASE case_clause (ELSE expr)? END
-	->	^(ESQL_FUNCTION_CALL CASE case_clause ^(ELSE expr)?)
+f_case	:	CASE case_clause (ELSE expression)? END
+	->	^(ESQL_FUNCTION_CALL CASE case_clause ^(ELSE expression)?)
 	;				
 fragment
   case_clause
@@ -726,7 +719,7 @@ fragment
   	;  	
 fragment
   select_clause
-  	:	select_item ('\,' select_item)*
+  	:	select_item (',' select_item)*
   	->	select_item+
   	;
 fragment
@@ -735,7 +728,7 @@ fragment
   	;
 fragment
   from_list
-  	:	from_item ('\,' from_item)*
+  	:	from_item (',' from_item)*
   	->	from_item+
   	;
 fragment
@@ -761,82 +754,77 @@ fragment
   	->	^(TO table_ref)? ^(VALUES params)?
 	;  	  	  	  	  	 
 
-// Expression
-expression	
-	:	fcall_expr | expr;
-	
-fcall_expr
-	:	expr '(' params? ')'
-	->	^(FCALL expr ^(PARAMS params)?);	
-	
-expr	:	singular_expr;
 
+
+expression
+	:	singular_expr;
+	
 singular_expr
-	:	SINGULAR^? like_expr
-	;	
-	
-like_expr
-	:	is_expr (NOT? LIKE^ is_expr (ESCAPE^ is_expr)? )?;	
-	
-is_expr	:	in_expr (IS^ NOT? (BOOL | 'INF' | '+INF' | '-INF' | 'INFINITY' | '+INFINITY' | '-INFINITY' | 'NAN' | 'NULL' | 'NUM' | 'NUMBER' | 'UNKNOWN'))?;  		
+	: 	SINGULAR^? like_expr;
 
-in_expr	:	exists_expr (NOT? IN^ '('! expression ('\,'! expression)* ')'! )?;
+like_expr
+	: 	is_expr (NOT? LIKE^ is_expr (ESCAPE^ is_expr)? )?;
+
+is_expr : 	in_expr (IS^ NOT? (BOOL | 'INF' | '+INF' | '-INF' | 'INFINITY' | '+INFINITY' | '-INFINITY' | 'NAN' | 'NULL' | 'NUM' | 'NUMBER' | 'UNKNOWN'))?;
+
+in_expr : 	exists_expr (NOT? IN^ '('! expression (','! expression)* ')'! )?;
 
 exists_expr
-	:	EXISTS^? between_expr;	
+	: 	EXISTS^? between_expr;
 
-between_expr	
-	:	eq_expr (NOT? BETWEEN_OP^ (ASYMMETRIC | SYMMETRIC)? eq_expr)*;
-
-eq_expr	:	colon_expr (EQ_OP^ colon_expr)*;
+between_expr
+	: 	eq_expr (NOT? BETWEEN_OP^ (ASYMMETRIC | SYMMETRIC)? eq_expr)*;	
+	
+eq_expr : 	colon_expr (EQ_OP^ colon_expr)*;
 
 colon_expr
-	:	logic_expr (':'^ logic_expr)*;
+	: 	logic_expr (':'^ logic_expr)*;	
 	
 logic_expr:	logic_not_expr (BINARY_LOGICAL_OP^ logic_not_expr)*;
 
 logic_not_expr
-	:	NOT^ logic_not_expr | sc_expr;
+	: 	(NOT^)* sc_expr;	
+	
+sc_expr : 	concat_expr (SIMPLE_COMPARE_OP^ concat_expr)*;
 
-sc_expr	:	concat_expr (SIMPLE_COMPARE_OP^ concat_expr)*;
+concat_expr
+	: 	add_expr (CONCAT_OP^ add_expr)*;
 
-concat_expr	
-	:	add_expr (CONCAT_OP^ add_expr)*;	
-
-add_expr
-	:	mult_expr ( (PLUS_OP^ | MINUS_OP^) mult_expr )*;
+add_expr: 	mult_expr ( (PLUS_OP^ | MINUS_OP^) mult_expr )*;
 
 mult_expr
-	:	dot_expr ( (MULT_OP^ | DIV_OP^) dot_expr)*;
+	: 	dot_expr ( (MULT_OP^ | DIV_OP^) dot_expr)*;
+
+dot_expr: 	array_expr (DOT_OP^ array_expr)*;	
 	
-dot_expr	
-	:	arr_expr (DOT_OP^ arr_expr)*;
-	
-arr_expr:	unary_expr ('['^ aidx? ']'!)*;
+array_expr: 	unary_expr ('['^ aidx? ']'!)*;
 
 fragment
-  aidx	:	SIMPLE_COMPARE_OP | expression
-  	;
-
-unary_expr 
-    	:  	MINUS_OP^ unary_expr |  '{'^ unary_expr '}'! | atom;
+  aidx : 	SIMPLE_COMPARE_OP | expression;
+  	
+unary_expr
+     	: 	MINUS_OP^ unary_expr | '{'^ unary_expr '}'! | af_expr;	
 	
-atom	:	  f_sql_code 
+af_expr	:	(atom '('! params? ')'!) => fcall_expr
+		| atom   
+		;	
+	
+atom	:	  f_sql_code
 		| f_sql_err_text
-		| f_sql_nerror 
-		| f_sql_state 
-		| f_extract 
-		| f_cur_date 
-		| f_cur_time 
-		| f_cur_timestamp 
-		| f_cur_gmt_date 
-		| f_cur_gmt_time 
-		| f_cur_gmt_timestamp 
+		| f_sql_nerror
+		| f_sql_state
+		| f_extract
+		| f_cur_date
+		| f_cur_time
+		| f_cur_timestamp
+		| f_cur_gmt_date
+		| f_cur_gmt_time
+		| f_cur_gmt_timestamp
 		| f_loc_timezone
-		| f_round 
-		| f_overlay 
-		| f_position 
-		| f_substring 
+		| f_round
+		| f_overlay
+		| f_position
+		| f_substring
 		| f_trim
 		| f_asbitstream
 		| f_for
@@ -847,14 +835,19 @@ atom	:	  f_sql_code
 		| f_list
 		| f_passthru
 		| IDENTIFIER
-		| INTLITERAL 
-		| STRINGLITERAL 
-		| BOOL 
-		| NULL 
+		| INTLITERAL
+		| STRINGLITERAL
+		| BOOL
+		| NULL
 		| QUOTEDSTRING
 		| '*' 
-		| '('! expr ')'!
-		;
+		| '('! expression ')'!
+	;
+	
+fcall_expr
+	:	fname=atom '(' params? ')'
+	->	^(FCALL $fname ^(PARAMS params)?)
+	;	
 
 // Simple comparison operators
 SIMPLE_COMPARE_OP
@@ -1096,7 +1089,7 @@ T_ROW	:	'ROW';
 NULL	:	'NULL';
 BOOL	:	'TRUE' | 'FALSE';
 INTLITERAL	
-	:	('0'..'9')+;
+		:	('0'..'9')+;
 STRINGLITERAL	:	'"' ( ESC_SEQ | ~('\\'|'"') )* '"';
 QUOTEDSTRING	:	'\'' .* '\'';
 
@@ -1138,6 +1131,5 @@ fragment
 UNICODE_ESC
     :   '\\' 'u' HEX_DIGIT HEX_DIGIT HEX_DIGIT HEX_DIGIT
     ;
-
 
 

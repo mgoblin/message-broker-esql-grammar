@@ -82,7 +82,7 @@ colon_expr:
     "InputRoot.XMLNSC.ns:event.ns:eventPointData.ns:eventData.ns:eventCorrelation.ns:localTransactionId"
     -> (: (: (: (: (: (. (. InputRoot XMLNSC) ns) (. event ns)) (. eventPointData ns)) (. eventData ns)) (. eventCorrelation ns)) localTransactionId)
 
-arr_expr:
+array_expr:
     "Order[2]" -> ([ Order 2)
     "Order[]" -> ([ Order)
 
@@ -110,16 +110,17 @@ var_ns_decl:
     "DECLARE sp1, sp2 SHARED NAMESPACE 'http://esql.ru'" -> (NS (sp1 SHARED)) (NS (sp2 SHARED)) (INIT sp1 'http://esql.ru') (INIT sp2 'http://esql.ru')
     "DECLARE sp1 NAME 'http://esql.ru'" -> (NS sp1) (INIT sp1 'http://esql.ru')
 
-var_only_decl:
-    "DECLARE deployEnvironment EXTERNAL CHARACTER" -> (VAR (deployEnvironment CHARACTER EXTERNAL))
-    "DECLARE deployEnvironment INT" -> (VAR (deployEnvironment INT))
-    "DECLARE sp1, sp2 SHARED INT" -> (VAR (sp1 INT SHARED)) (VAR (sp2 INT SHARED))
 
 const_decl:
      "DECLARE deployEnvironment EXTERNAL CONSTANT CHARACTER 'XYZ'" -> (CONSTANT (deployEnvironment CHARACTER EXTERNAL)) (INIT deployEnvironment 'XYZ')
 
 var_ctor_decl:
     "DECLARE v INT -10" -> (VAR (v INT)) (INIT v (- 10))
+
+var_only_decl:
+    "DECLARE deployEnvironment EXTERNAL CHARACTER" -> (VAR (deployEnvironment CHARACTER EXTERNAL))
+    "DECLARE deployEnvironment INT" -> (VAR (deployEnvironment INT))
+    "DECLARE sp1, sp2 SHARED INT" -> (VAR (sp1 INT SHARED)) (VAR (sp2 INT SHARED))
 
 set_stat:
     "SET x = y" -> "(SET (= x y))"
@@ -193,7 +194,7 @@ detach_stat:
 
 call_stat:
     "CALL myProc1() INTO cursor" -> (CALL (FCALL myProc1) (INTO cursor))
-    "CALL schema.myProc(10, 'X')" -> (CALL (FCALL (. schema myProc) (PARAMS 10 'X')))
+    "CALL schema.myProc(10, 'X')" -> (CALL (. schema (FCALL myProc (PARAMS 10 'X'))))
 
 case_stat:
     <<
@@ -378,7 +379,7 @@ f_asbitstream:
 
 f_for:
      "FOR ALL Body.Invoice.Purchases.Item[] AS I (I.Quantity <= 50)"
-     -> (ESQL_FUNCTION_CALL FOR PROPS (PARAMS (AS (. (. (. Body Invoice) Purchases) ([ Item)) I)) (<= (. I Quantity) 50))
+     -> (ESQL_FUNCTION_CALL FOR PROPS (PARAMS (AS (. (. (. Body Invoice) Purchases) ([ Item)) (FCALL I (PARAMS (<= (. I Quantity) 50))))))
 
 f_case:
     <<
