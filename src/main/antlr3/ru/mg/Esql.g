@@ -800,7 +800,7 @@ dot_expr: 	array_expr (DOT_OP^ array_expr)*;
 array_expr: 	unary_expr ('['^ aidx? ']'!)*;
 
 fragment
-  aidx : 	SIMPLE_COMPARE_OP | expression;
+  aidx : 	SIMPLE_COMPARE_OP? expression;
   	
 unary_expr
      	: 	MINUS_OP^ unary_expr | '{'^ unary_expr '}'! | af_expr;	
