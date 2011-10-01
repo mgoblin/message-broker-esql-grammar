@@ -85,6 +85,7 @@ colon_expr:
 array_expr:
     "Order[2]" -> ([ Order 2)
     "Order[]" -> ([ Order)
+    "*[<]" -> ([ * <)
 
 like_expr:
     "Body.Trade.Company LIKE 'I%'" -> (LIKE (. (. Body Trade) Company) 'I%')
