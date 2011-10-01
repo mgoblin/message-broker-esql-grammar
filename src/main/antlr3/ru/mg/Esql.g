@@ -1,5 +1,6 @@
 grammar Esql;
 
+
 options {
   language = Java;
   output = AST;
@@ -24,6 +25,10 @@ tokens {
 	FCALL;
 }
 // End AST node names
+
+@header { package ru.mg.esql.antlr; }
+@lexer::header { package ru.mg.esql.antlr; }
+
 
 module	:	schema_stat	
 	;
