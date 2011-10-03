@@ -841,6 +841,7 @@ atom	:	  f_sql_code
 		| f_passthru
 		| IDENTIFIER
 		| INTLITERAL
+		| FLOATLITERAL
 		| STRINGLITERAL
 		| BOOL
 		| NULL
@@ -1095,6 +1096,7 @@ NULL	:	'NULL';
 BOOL	:	'TRUE' | 'FALSE';
 INTLITERAL	
 		:	('0'..'9')+;
+FLOATLITERAL	:	('0'..'9')+ '.' ('0'..'9')+;
 STRINGLITERAL	:	'"' ( ESC_SEQ | ~('\\'|'"') )* '"';
 QUOTEDSTRING	:	'\'' .* '\'';
 

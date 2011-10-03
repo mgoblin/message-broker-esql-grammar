@@ -16,6 +16,9 @@ IDENTIFIER:
 INTLITERAL:
     "1" OK
 
+FLOATLITERAL:
+    "1.1" OK
+
 QUOTEDSTRING:
     "'http://esql.ru'" OK
     "''" OK
