@@ -30,6 +30,9 @@ atom:
    "TRUE" -> "TRUE"
    "FALSE" -> "FALSE"
 
+fld_ref:
+   "(..)*" -> "(..) *"
+
 unary_expr:
     "-10" -> (- 10)
 

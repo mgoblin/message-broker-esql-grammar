@@ -811,8 +811,10 @@ unary_expr
      	: 	MINUS_OP^ unary_expr | '{'^ af_expr '}'! | af_expr;	
 	
 af_expr	:	(atom '('! params? ')'!) => fcall_expr
-		| atom   
-		;	
+		| fld_ref   
+		;
+		
+fld_ref	:	'(..)'? atom;			
 	
 atom	:	  f_sql_code
 		| f_sql_err_text
